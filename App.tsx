@@ -1,33 +1,18 @@
 import React from 'react';
-
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { RootNavigator } from './src/navigation';
+import { useInitializeStores } from './src/store';
+import './src/locales/i18n.config'; // Initialize i18n
 
+const App = () => {
+  // Initialize stores on app start
+  useInitializeStores();
 
-import HomeScreen from './screens/HomeScreen';
-import VideoCallScreen from './screens/VideoCallScreen';
-
-const RootStack = createStackNavigator();
-
-const App = () => (
+  return (
     <NavigationContainer>
-      <RootStack.Navigator initialRouteName="Home">
-        <RootStack.Screen
-          component = { HomeScreen }
-          name = "Home"
-          options = {{
-            headerShown: false,
-          }}
-        />
-        <RootStack.Screen
-          component = { VideoCallScreen }
-          name = "Meeting"
-          options = {{
-            headerShown: false,
-          }}
-        />
-      </RootStack.Navigator>
+      <RootNavigator />
     </NavigationContainer>
-);
+  );
+};
 
 export default App;

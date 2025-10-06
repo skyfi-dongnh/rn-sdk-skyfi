@@ -7,20 +7,27 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useI18n } from '../../hooks';
+import { LanguageSwitcher } from '../../components/common';
 
 const HomeScreen: React.FC = ({}) => {
   const navigation = useNavigation();
+  const { t } = useI18n();
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.languageContainer}>
+        <LanguageSwitcher />
+      </View>
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome to SkyFi SDK</Text>
-        <Text style={styles.subtitle}>Video Call Demo</Text>
+        <Text style={styles.title}>{t('home.title')}</Text>
+        <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
 
         <TouchableOpacity
           style={styles.button}
           // @ts-ignore
           onPress={() => navigation.navigate('Meeting', { room: '0879999328' })}>
-          <Text style={styles.buttonText}>Start Video Call</Text>
+          <Text style={styles.buttonText}>{t('home.startCall')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -31,6 +38,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  languageContainer: {
+    alignItems: 'flex-end',
+    padding: 20,
   },
   content: {
     flex: 1,

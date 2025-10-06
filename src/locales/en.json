@@ -1,0 +1,46 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "home": "Home",
+    "settings": "Settings",
+    "logout": "Logout",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "loginSuccess": "Login successful",
+    "loginError": "Login failed. Please check your credentials",
+    "registerSuccess": "Registration successful",
+    "registerError": "Registration failed"
+  },
+  "home": {
+    "title": "Welcome to SkyFi SDK",
+    "subtitle": "Video Call Demo",
+    "startCall": "Start Video Call"
+  },
+  "meeting": {
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "endCall": "End Call"
+  },
+  "errors": {
+    "network": "Network error. Please check your connection",
+    "server": "Server error. Please try again later",
+    "unauthorized": "Unauthorized. Please login again",
+    "notFound": "Resource not found",
+    "validation": "Validation error"
+  }
+}
