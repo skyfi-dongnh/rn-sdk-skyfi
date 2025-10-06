@@ -1,7 +1,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider } from '@rneui/themed';
 import { RootNavigator } from './src/navigation';
 import { useInitializeStores } from './src/store';
+import { theme } from './src/theme';
 import './src/locales/i18n.config'; // Initialize i18n
 
 const App = () => {
@@ -9,9 +11,11 @@ const App = () => {
   useInitializeStores();
 
   return (
-    <NavigationContainer>
-      <RootNavigator />
-    </NavigationContainer>
+    <ThemeProvider theme={theme}>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </ThemeProvider>
   );
 };
 

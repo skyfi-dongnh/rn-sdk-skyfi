@@ -9,10 +9,12 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useI18n } from '../../hooks';
 import { LanguageSwitcher } from '../../components/common';
+import { useTheme } from '@rneui/themed';
 
-const HomeScreen: React.FC = ({}) => {
+const HomeScreen: React.FC = ({ }) => {
   const navigation = useNavigation();
   const { t } = useI18n();
+  const { theme, updateTheme } = useTheme();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,7 +26,7 @@ const HomeScreen: React.FC = ({}) => {
         <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
 
         <TouchableOpacity
-          style={styles.button}
+          style={{ ...styles.button, backgroundColor: theme.colors.primary }}
           // @ts-ignore
           onPress={() => navigation.navigate('Meeting', { room: '0879999328' })}>
           <Text style={styles.buttonText}>{t('home.startCall')}</Text>
