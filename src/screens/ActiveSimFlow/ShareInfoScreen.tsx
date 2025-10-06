@@ -72,18 +72,18 @@ export default ShareInfoScreen;
 
 const useStyles = makeStyles((theme) => ({
     container: {
-        marginTop: 16,
+        marginTop: theme.spacing.lg,
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: theme.colors.background,
     },
     headerGradient: {
-        paddingBottom: 16,
+        paddingBottom: theme.spacing.lg,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.sm,
         gap: 20,
     },
     backButton: {
@@ -94,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
     },
     headerTitle: {
         flex: 1,
-        fontSize: 16,
+        fontSize: theme.spacing.lg,
         fontWeight: '600',
         color: '#FFFFFF',
     },
