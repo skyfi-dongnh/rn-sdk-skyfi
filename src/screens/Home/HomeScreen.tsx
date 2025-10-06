@@ -3,76 +3,84 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useI18n } from '../../hooks';
 import { LanguageSwitcher } from '../../components/common';
 import { useTheme } from '@rneui/themed';
+import { Button } from '@rneui/themed';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { makeStyles } from '@rneui/themed';
+
+interface Props {
+  fullWidth?: boolean;
+}
+
+const useStyles = makeStyles((theme, props: Props) => ({
+  container: {
+    flex: 1,
+    background: theme.colors.white,
+    width: props.fullWidth ? '100%' : 'auto',
+  },
+  text: {
+    color: theme.colors.primary,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    gap: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: theme.colors.primary,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 24,
+    color: theme.colors.grey0,
+    textAlign: 'center',
+  },
+
+}));
 
 const HomeScreen: React.FC = ({ }) => {
   const navigation = useNavigation();
   const { t } = useI18n();
   const { theme, updateTheme } = useTheme();
+  const styles = useStyles({ fullWidth: true });
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.languageContainer}>
+      <View>
         <LanguageSwitcher />
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>{t('home.title')}</Text>
         <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
 
-        <TouchableOpacity
-          style={{ ...styles.button, backgroundColor: theme.colors.primary }}
+        <Button
+          title={t('home.startCall')}
           // @ts-ignore
-          onPress={() => navigation.navigate('Meeting', { room: '0879999328' })}>
-          <Text style={styles.buttonText}>{t('home.startCall')}</Text>
-        </TouchableOpacity>
+          onPress={() => navigation.navigate('Meeting', { room: '0879999328' })}
+        />
+        {/* button open Active Sim Flow */}
+        <Button
+          title={t('home.moveToActiveFlow')}
+          // @ts-ignore
+          onPress={() => navigation.navigate('ShareInfo')}
+        />
       </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  languageContainer: {
-    alignItems: 'flex-end',
-    padding: 20,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 40,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
+
+
 
 export default HomeScreen;

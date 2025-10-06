@@ -28,7 +28,8 @@
   "home": {
     "title": "Chào mừng đến với SkyFi SDK",
     "subtitle": "Demo cuộc gọi video",
-    "startCall": "Bắt đầu cuộc gọi"
+    "startCall": "Bắt đầu cuộc gọi",
+    "moveToActiveFlow": "Kích hoạt SIM"
   },
   "meeting": {
     "connecting": "Đang kết nối...",

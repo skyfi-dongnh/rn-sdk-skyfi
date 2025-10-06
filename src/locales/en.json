@@ -28,8 +28,9 @@
   "home": {
     "title": "Welcome to SkyFi SDK",
     "subtitle": "Video Call Demo",
-    "startCall": "Start Video Call"
-  },
+    "startCall": "Start Video Call",
+    "moveToActiveFlow": "Move to Active SIM Flow"
+    },
   "meeting": {
     "connecting": "Connecting...",
     "connected": "Connected",
