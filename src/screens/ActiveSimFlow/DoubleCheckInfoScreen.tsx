@@ -31,7 +31,7 @@ const DoubleCheckInfoScreen = () => {
 
     const handleContinue = () => {
         console.log('Continue to next step');
-        // Navigate to next screen
+        navigation.navigate('SignTheContract');
     };
 
     return (
@@ -46,6 +46,7 @@ const DoubleCheckInfoScreen = () => {
                         <View style={[styles.stepDot, styles.stepDotActive]} />
                         <View style={[styles.stepDot, styles.stepDotActive]} />
                         <View style={[styles.stepDot, styles.stepDotActive]} />
+                        <View style={[styles.stepDot]} />
                     </View>
                     <View style={styles.headerSpacer} />
                 </View>
@@ -151,7 +152,7 @@ const useStyles = makeStyles((theme) => ({
         height: 4,
         backgroundColor: '#A1A1A1',
         borderRadius: 2,
-        maxWidth: 80,
+        maxWidth: 60,
     },
     stepDotActive: {
         backgroundColor: '#0000EA',

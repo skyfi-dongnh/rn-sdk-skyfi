@@ -3,6 +3,7 @@ export type RootStackParamList = {
     ShareInfo: undefined;
     InputInfoSim: undefined;
     DoubleCheckInfo: undefined;
+    SignTheContract: undefined;
     Meeting: { room: string };
 
 };
