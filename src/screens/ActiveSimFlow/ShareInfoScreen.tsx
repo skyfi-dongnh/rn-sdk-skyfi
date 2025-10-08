@@ -1,9 +1,15 @@
 import * as React from 'react';
 import { View, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Button, makeStyles, Text } from '@rneui/themed';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '../../navigation/types';
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const ShareInfoScreen = () => {
     const styles = useStyles();
+    const navigation = useNavigation<NavigationProp>();
     const [isChecked, setIsChecked] = React.useState(false);
 
     const handlePolicyPress = () => {
@@ -82,6 +88,7 @@ const ShareInfoScreen = () => {
                     <Button
                         title="Tiếp tục"
                         disabled={!isChecked}
+                        onPress={() => navigation.navigate('InputInfoSim')}
                         containerStyle={styles.buttonContainer}
                     />
                 </View>
