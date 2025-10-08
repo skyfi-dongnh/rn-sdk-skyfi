@@ -11,6 +11,8 @@ import { useTheme } from '@rneui/themed';
 import { Button } from '@rneui/themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { makeStyles } from '@rneui/themed';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navigation';
 
 interface Props {
   fullWidth?: boolean;
@@ -49,10 +51,12 @@ const useStyles = makeStyles((theme, props: Props) => ({
 
 }));
 
+type NavigationProp = StackNavigationProp<RootStackParamList>;
+
+
 const HomeScreen: React.FC = ({ }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const { t } = useI18n();
-  const { theme, updateTheme } = useTheme();
   const styles = useStyles({ fullWidth: true });
 
   return (
@@ -66,13 +70,11 @@ const HomeScreen: React.FC = ({ }) => {
 
         <Button
           title={t('home.startCall')}
-          // @ts-ignore
           onPress={() => navigation.navigate('Meeting', { room: '0879999328' })}
         />
         {/* button open Active Sim Flow */}
         <Button
           title={t('home.moveToActiveFlow')}
-          // @ts-ignore
           onPress={() => navigation.navigate('ShareInfo')}
         />
       </View>

@@ -2,11 +2,16 @@ import * as React from 'react';
 import { View, ScrollView, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { Button, makeStyles, Text } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
+import { Image } from '@rneui/base';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '../../navigation/types';
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const InputInfoSimScreen = () => {
     const styles = useStyles();
-    const navigation = useNavigation();
-    const [phoneNumber] = React.useState('0707 123 456');
+    const navigation = useNavigation<NavigationProp>();
+    const [phoneNumber, setPhoneNumber] = React.useState('0707 123 456');
     const [serialNumber, setSerialNumber] = React.useState('');
     const [isFocused, setIsFocused] = React.useState(false);
 
@@ -17,10 +22,8 @@ const InputInfoSimScreen = () => {
 
     const handleContinue = () => {
         console.log('Continue with serial:', serialNumber);
-        // Navigate to next screen
+        navigation.navigate('DoubleCheckInfo');
     };
-
-    const isButtonDisabled = serialNumber.trim().length === 0;
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -58,7 +61,7 @@ const InputInfoSimScreen = () => {
                             <View style={styles.inputWrapper}>
                                 <View style={styles.inputContent}>
                                     <Text style={styles.inputLabel}>Số thuê bao cần kích hoạt</Text>
-                                    <Text style={styles.inputValueDisabled}>{phoneNumber}</Text>
+                                    <TextInput onChangeText={setPhoneNumber} style={styles.inputValueDisabled} value={phoneNumber} editable={true} />
                                 </View>
                             </View>
                         </View>
@@ -74,7 +77,6 @@ const InputInfoSimScreen = () => {
                                         <Text style={styles.requiredStar}>*</Text>
                                     </View>
                                     <View style={styles.inputValueRow}>
-                                        {isFocused && <View style={styles.cursor} />}
                                         <TextInput
                                             style={styles.input}
                                             value={serialNumber}
@@ -89,7 +91,11 @@ const InputInfoSimScreen = () => {
                                     </View>
                                 </View>
                                 <TouchableOpacity onPress={handleScanPress} style={styles.scanButton}>
-                                    <View style={styles.scanIcon} />
+                                    <Image
+                                        source={require('../../assets/icons/ic_scan.png')}
+                                        style={styles.scanIcon}
+                                        resizeMode="contain"
+                                    />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -100,16 +106,8 @@ const InputInfoSimScreen = () => {
                 <View style={styles.bottomContainer}>
                     <Button
                         title="Tiếp tục"
-                        disabled={isButtonDisabled}
                         onPress={handleContinue}
-                        containerStyle={styles.buttonContainer}
-                        buttonStyle={styles.button}
-                        titleStyle={styles.buttonText}
-                        disabledStyle={styles.buttonDisabled}
-                        disabledTitleStyle={styles.buttonDisabledText}
                     />
-                    {/* Home Indicator */}
-                    <View style={styles.homeIndicator} />
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -193,7 +191,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: '#FFFFFF',
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: 'transparent',
+        borderColor: '#E5E5E5',
     },
     inputWrapperFocused: {
         borderColor: '#333333',
@@ -256,8 +254,6 @@ const useStyles = makeStyles((theme) => ({
     scanIcon: {
         width: 24,
         height: 24,
-        borderWidth: 2,
-        borderColor: '#333333',
         borderRadius: 4,
     },
     bottomContainer: {

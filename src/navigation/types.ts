@@ -5,5 +5,8 @@ export type RootStackParamList = {
     CheckInfo: undefined;
     Signature: undefined;
     StartVideoCall: undefined;
+    DoubleCheckInfo: undefined;
+    SignTheContract: undefined;
     Meeting: { room: string };
+
 };

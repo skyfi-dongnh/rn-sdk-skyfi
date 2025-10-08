@@ -6,6 +6,8 @@ import HomeScreen from '../screens/Home/HomeScreen';
 import VideoCallScreen from '../screens/Meeting/VideoCallScreen';
 import ShareInfoScreen from '../screens/ActiveSimFlow/ShareInfoScreen';
 import InputInfoSimScreen from '../screens/ActiveSimFlow/InputInfoSimScreen';
+import DoubleCheckInfoScreen from '../screens/ActiveSimFlow/DoubleCheckInfoScreen';
+import SignTheContractScreen from '../screens/ActiveSimFlow/SignTheContractScreen';
 
 const RootStack = createStackNavigator();
 
@@ -28,6 +30,20 @@ export const RootNavigator = () => (
     <RootStack.Screen
       component={InputInfoSimScreen}
       name="InputInfoSim"
+      options={{
+        headerShown: false,
+      }}
+    />
+    <RootStack.Screen
+      component={DoubleCheckInfoScreen}
+      name="DoubleCheckInfo"
+      options={{
+        headerShown: false,
+      }}
+    />
+    <RootStack.Screen
+      component={SignTheContractScreen}
+      name="SignTheContract"
       options={{
         headerShown: false,
       }}
