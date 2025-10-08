@@ -3,10 +3,14 @@ import { View, ScrollView, SafeAreaView, TextInput, TouchableOpacity, KeyboardAv
 import { Button, makeStyles, Text } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import { Image } from '@rneui/base';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '../../navigation/types';
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const InputInfoSimScreen = () => {
     const styles = useStyles();
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
     const [phoneNumber, setPhoneNumber] = React.useState('0707 123 456');
     const [serialNumber, setSerialNumber] = React.useState('');
     const [isFocused, setIsFocused] = React.useState(false);
@@ -18,7 +22,7 @@ const InputInfoSimScreen = () => {
 
     const handleContinue = () => {
         console.log('Continue with serial:', serialNumber);
-        // Navigate to next screen
+        navigation.navigate('DoubleCheckInfo');
     };
 
     return (
