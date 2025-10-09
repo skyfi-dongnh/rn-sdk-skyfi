@@ -1,25 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Modal,
-    PanResponder,
-    StyleSheet,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Dimensions,
+  Modal,
+  PanResponder,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
+import ModalType from '../../../types/modal';
 import { useModal } from '../../common/modal';
 
-export interface BottomSheetProps {
-  visible: boolean;
-  children: React.ReactNode;
-  closeOnBackdrop?: boolean;
-  maxHeight?: number;
-}
 
 const { height: screenHeight } = Dimensions.get('window');
 
-export const BottomSheet: React.FC<BottomSheetProps> = ({
+export const BottomSheet: React.FC<ModalType.BottomSheetProps> = ({
   visible,
   children,
   closeOnBackdrop = true,
@@ -86,7 +81,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     })
   ).current;
 
-  
+
 
   if (!visible) return null;
 
@@ -171,6 +166,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 4,
     paddingBottom: 20,
-   
+
   },
 });

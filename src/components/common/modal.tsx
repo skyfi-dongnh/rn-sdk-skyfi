@@ -1,36 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { BaseModal, BaseModalProps } from '../modals/modalBase/BaseModal';
-import { BottomSheet, BottomSheetProps } from '../modals/modalBase/BottomSheet';
+import Modal from "../../types/modal";
+import { BaseModal } from '../modals/modalBase/BaseModal';
+import { BottomSheet } from '../modals/modalBase/BottomSheet';
 
 
-type ModalRenderProps<T = unknown> = {
-    close(): void;
-    done(data: T): void | Promise<any>;
-};
 
-
-type ModalOptions<T = unknown> = {
-    modalId: string;
-    render: React.ReactNode | React.ComponentType<ModalRenderProps<T>>;
-    onClose?(): void;
-    onDone?(data: T): void | Promise<any>;
-    closeButton?: boolean;
-    typeModal?: 'modal' | 'bottom-sheet';
-    props?: Omit<BaseModalProps, 'visible'> | Omit<BottomSheetProps, 'visible'>;
-};
-
-type ModalProps = {
-    typeModal: 'modal' | 'bottom-sheet';
-    content: React.ReactNode; visible: boolean;
-    props?: Omit<BaseModalProps, 'visible'> | Omit<BottomSheetProps, 'visible'>;
-}
-
-type useModalType = ModalOptions & {
-    close(): void;
-    done(data: unknown): void | Promise<any>;
-};
-
-let eventManager: Map<string, ModalOptions> = new Map();
+let eventManager: Map<string, Modal.ModalOptions> = new Map();
 let listeners: Set<() => void> = new Set();
 
 function randomId() {
@@ -41,29 +16,28 @@ function notifyListeners() {
     listeners.forEach(listener => listener());
 }
 
-function dispatchModal<T = unknown>(options: Omit<ModalOptions<T>, 'modalId' | 'close' | 'done'> & { modalId?: string }) {
+function dispatchModal<T = unknown>(options: Omit<Modal.ModalOptions<T>, 'modalId' | 'close' | 'done'> & { modalId?: string }) {
     const id = options.modalId || randomId();
     eventManager.set(id, { ...options, modalId: id });
-    console.log('addmoda', eventManager.size);
     notifyListeners();
 }
-function modal(options: ModalOptions) {
+function modal(options: Modal.ModalOptions) {
     return dispatchModal(options);
 }
 
 modal.open = dispatchModal;
 
-modal.showBottomSheet = function <T = unknown>(options: Omit<ModalOptions<T>, 'typeModal' | 'modalId'> & { modalId?: string }) {
+modal.showBottomSheet = function <T = unknown>(options: Omit<Modal.ModalOptions<T>, 'typeModal' | 'modalId'> & { modalId?: string }) {
     return dispatchModal<T>({ ...options, typeModal: 'bottom-sheet' });
 }
-const ModalContext = createContext<ModalOptions & useModalType>({} as ModalOptions & useModalType);
+const ModalContext = createContext<Modal.useModalType>({} as Modal.useModalType);
 
 const useModal = () => useContext(ModalContext);
 
 const ModalProvider = () => {
     const [modalIds, setModalIds] = useState<Record<string, boolean>>({})
     const [updateTrigger, setUpdateTrigger] = useState(0);
-    const modalRender = useRef(new Map<string, { content: React.ReactNode; data: ModalOptions & useModalType }>()).current;
+    const modalRender = useRef(new Map<string, { content: React.ReactNode; data: Modal.useModalType }>()).current;
 
     useEffect(() => {
         // Subscribe to modal changes
@@ -90,14 +64,14 @@ const ModalProvider = () => {
     }, [modalRender]);
 
     const isNotValid = useCallback(
-        (options: ModalOptions) => {
+        (options: Modal.ModalOptions) => {
             return modalRender.has(options.modalId);
         },
         [modalRender]
     );
 
     const appendModal = useCallback(
-        (content: React.ReactNode, modalProps: ModalOptions & useModalType) => {
+        (content: React.ReactNode, modalProps: Modal.useModalType) => {
             const { modalId } = modalProps;
             modalRender.set(modalId, { content, data: modalProps });
             setModalIds((state) => ({ ...state, [modalId]: true }));
@@ -106,7 +80,7 @@ const ModalProvider = () => {
     );
 
     const buildModal = useCallback(
-        (options: ModalOptions) => {
+        (options: Modal.ModalOptions) => {
             const newOptions = Object.assign({}, { ...options });
             if (isNotValid(newOptions)) return;
 
@@ -125,7 +99,7 @@ const ModalProvider = () => {
                     }, 0);
                 }
             };
-            const modalProps: ModalOptions & useModalType = {
+            const modalProps: Modal.useModalType = {
                 ...newOptions,
                 ...modalRenderProps
             };
@@ -144,24 +118,27 @@ const ModalProvider = () => {
     }, [updateTrigger, buildModal]);
 
     // AppModal component for default modal type
-    const AppModal = ({ children, visible, props }: { children: React.ReactNode; visible: boolean; props?: Omit<BaseModalProps, 'visible'> }) => (
-        <BaseModal visible={visible} {...props}>
-            {children}
-        </BaseModal>
-    );
+    const AppModal = ({ children, visible, props }: { children: React.ReactNode; visible: boolean; props?: Modal.BaseModal }) => {
+       return (
+            <BaseModal visible={visible} {...props}>
+                {children}
+            </BaseModal>
+        );
+    }
 
-    const renderModal = ({ typeModal, content, visible, props }: ModalProps) => {
+    const renderModal = ({ typeModal, content, visible, props }: Modal.ModalProps) => {
+
         switch (typeModal) {
             case 'bottom-sheet':
                 return (
-                    <BottomSheet visible={visible} {...(props as Omit<BottomSheetProps, "visible">)} >
+                    <BottomSheet visible={visible} {...(props as Modal.BottomSheet)} >
                         {content}
                     </BottomSheet>
                 );
             case 'modal':
             default:
                 return (
-                    <AppModal visible={visible} {...(props as Omit<BaseModalProps, "visible">)} >
+                    <AppModal visible={visible} props={props} >
                         {content}
                     </AppModal>
                 );

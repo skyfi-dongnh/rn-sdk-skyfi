@@ -2,6 +2,7 @@ import { Button } from '@rneui/themed';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { modal, useModal } from './modal';
+import Modal from '../../types/modal';
 
 // Example modal content component based on the Figma design
 const ExampleModalContent = () => {
@@ -23,7 +24,7 @@ const ExampleModalContent = () => {
         <TouchableOpacity style={styles.outlineButton} onPress={close}>
           <Text style={styles.outlineButtonText}>Thực hiện lại</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={styles.primaryButton} onPress={() => done({ action: 'send_video' })}>
           <Text style={styles.primaryButtonText}>Gửi Video</Text>
         </TouchableOpacity>
@@ -36,7 +37,6 @@ const ExampleModalContent = () => {
 export const ModalExamples = () => {
   const showModal = () => {
     modal.open({
-      typeModal: 'modal',
       render: <ExampleModalContent />,
       onDone: (data: any) => {
         console.log('Modal done with data:', data);
@@ -44,6 +44,9 @@ export const ModalExamples = () => {
       onClose: () => {
         console.log('Modal closed');
       },
+      props: {
+        closeOnBackdrop: false,
+      } as Modal.BaseModal,
     });
   };
 
@@ -90,15 +93,15 @@ export const ModalExamples = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.exampleTitle}>Modal Examples</Text>
-      
+
       <TouchableOpacity style={styles.exampleButton} onPress={showModal}>
         <Text style={styles.exampleButtonText}>Show Modal</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity style={styles.exampleButton} onPress={showBottomSheet}>
         <Text style={styles.exampleButtonText}>Show Bottom Sheet</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity style={styles.exampleButton} onPress={showSheet}>
         <Text style={styles.exampleButtonText}>Show Sheet</Text>
       </TouchableOpacity>
@@ -128,7 +131,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  
+
   // Modal content styles (based on Figma design)
   modalContent: {
     gap: 24,
@@ -145,7 +148,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   description: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '500',
     lineHeight: 15,
     color: '#5C5C5C',
@@ -187,7 +190,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 20,
   },
-  
+
   // Bottom sheet styles
   bottomSheetContent: {
     gap: 16,
@@ -207,7 +210,7 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: 'center',
   },
-  
+
   // Sheet styles
   sheetContent: {
     gap: 16,

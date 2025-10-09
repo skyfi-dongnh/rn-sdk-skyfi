@@ -1,9 +1,9 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 // API Configuration
 const API_CONFIG = {
-  baseURL: 'https://api.example.com', // Replace with your API base URL
+  baseURL: 'https://bss-api.skyfi.pro/api', // Replace with your API base URL
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ axiosInstance.interceptors.request.use(
       // Log request in development
       if (__DEV__) {
         console.log('API Request:', {
-          url: config.url,
+          url: `${config.baseURL}${config.url}`,
           method: config.method,
           data: config.data,
         });

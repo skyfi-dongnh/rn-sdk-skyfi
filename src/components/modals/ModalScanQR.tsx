@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Linking,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera';
+import Modal from '../../types/modal';
 import { modal, useModal } from '../common/modal';
-import { BottomSheetProps } from './modalBase/BottomSheet';
 
 
 const ModalScanQR = () => {
@@ -88,14 +88,14 @@ const ModalScanQR = () => {
     codeTypes: ['qr', 'ean-13', 'code-128', 'code-39', 'code-93', 'ean-8', 'upc-e'],
     onCodeScanned: (codes) => {
       if (isScanning || codes.length === 0) return;
-      
+
       setIsScanning(true);
       const scannedData = codes[0]?.value;
-      
+
       if (scannedData) {
         // Vibrate on successful scan (optional)
         // Vibration.vibrate(100);
-        
+
         setTimeout(() => {
           done(scannedData);
         }, 100);
@@ -178,9 +178,9 @@ const ModalScanQR = () => {
               </View>
             </TouchableOpacity>
           </View>
-          
+
           <Text style={styles.title}>Quét mã QR</Text>
-          
+
           <Text style={styles.description}>
             Đối với SIM vật lý: Quét mã trên thẻ SIM{'\n'}
             Đối với eSIM: Quét mã QR đã gửi về email
@@ -436,7 +436,7 @@ export const showScanQRModal = () => {
       },
       props:{
         maxHeight: 1,
-      } as Omit<BottomSheetProps, 'visible'>,
+      } as Modal.BottomSheet,
     });
   });
 };

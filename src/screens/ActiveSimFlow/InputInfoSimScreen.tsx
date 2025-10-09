@@ -4,8 +4,11 @@ import { Image } from '@rneui/base';
 import { Button, makeStyles, Text } from '@rneui/themed';
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
+import { showMessage } from '../../components/modals/ModalComfirm';
 import { showScanQRModal } from '../../components/modals/ModalScanQR';
+import { useLoading } from '../../hooks';
 import type { RootStackParamList } from '../../navigation/types';
+import ActivateApi from '../../services/api/activate.api';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -15,14 +18,44 @@ const InputInfoSimScreen = () => {
     const [phoneNumber, setPhoneNumber] = React.useState('0707 123 456');
     const [serialNumber, setSerialNumber] = React.useState('');
     const [isFocused, setIsFocused] = React.useState(false);
+    const { load, close } = useLoading();
 
-    const handleScanPress = () => {
-      showScanQRModal().then((data) => {
-        setSerialNumber(data);
-      }).catch((error) => {
-        console.log('Error scanning QR code:', error);
-      });
+    const handleScanPress = async () => {
+        try {
+            const data = await showScanQRModal();
+            return getInfoIccd(data);
+        } catch {
+            showMessage({
+                title: 'Thông báo',
+                description: 'Quét mã không thành công. Vui lòng thử lại.',
+                closeLabel: 'Đóng',
+                confirmLabel: 'Thử lại'
+            })
+        }
     };
+
+    const getInfoIccd = async (barcode: string) => {
+        try {
+            load();
+            const res = await ActivateApi.infoIccd({ barcode });
+            if (res.code === 200 && res.result) {
+                setSerialNumber(res.result.iccid);
+                setPhoneNumber(res.result.msisdn);
+            } else {
+                throw new Error('Không tìm thấy thông tin ICCD. Vui lòng thử lại.');
+            }
+
+        } catch (error: Error | any) {
+            showMessage({
+                title: 'Thông báo',
+                description: error.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+                closeLabel: 'Đóng',
+                confirmLabel: 'Thử lại'
+            })
+        } finally {
+            close();
+        }
+    }
 
     const handleContinue = () => {
         console.log('Continue with serial:', serialNumber);
