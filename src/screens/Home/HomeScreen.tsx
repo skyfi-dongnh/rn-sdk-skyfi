@@ -1,17 +1,14 @@
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Button, makeStyles } from '@rneui/themed';
 import React from 'react';
 import {
-  View,
   Text,
-  StyleSheet,
+  View
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useI18n } from '../../hooks';
-import { LanguageSwitcher } from '../../components/common';
-import { useTheme } from '@rneui/themed';
-import { Button } from '@rneui/themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { makeStyles } from '@rneui/themed';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { LanguageSwitcher } from '../../components/common';
+import { useI18n } from '../../hooks';
 import { RootStackParamList } from '../../navigation';
 
 interface Props {
@@ -76,6 +73,10 @@ const HomeScreen: React.FC = ({ }) => {
         <Button
           title={t('home.moveToActiveFlow')}
           onPress={() => navigation.navigate('ShareInfo')}
+        />
+        <Button
+          title="Modal Examples"
+          onPress={() => navigation.navigate('ModalExamples')}
         />
       </View>
     </SafeAreaView>

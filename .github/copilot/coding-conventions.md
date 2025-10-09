@@ -6,6 +6,7 @@
 - Use `StyleSheet.create()` or centralized theme files.
 - Follow linting and formatting from `.eslintrc.js` and `.prettierrc.js`.
 - Keep components **small, reusable, and stateless** when possible.
+- Use `modal.open()` to open a Modal component and use function useModal to  `const { close, done } = useModal();` 
 
 ### File Naming
 - **Components/Screens:** PascalCase (e.g. `HomeScreen.tsx`)

@@ -1,9 +1,10 @@
-import * as React from 'react';
-import { View, ScrollView, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import { Button, makeStyles, Text } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
-import { Image } from '@rneui/base';
 import type { StackNavigationProp } from '@react-navigation/stack';
+import { Image } from '@rneui/base';
+import { Button, makeStyles, Text } from '@rneui/themed';
+import * as React from 'react';
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
+import { showScanQRModal } from '../../components/modals/ModalScanQR';
 import type { RootStackParamList } from '../../navigation/types';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -16,8 +17,11 @@ const InputInfoSimScreen = () => {
     const [isFocused, setIsFocused] = React.useState(false);
 
     const handleScanPress = () => {
-        console.log('Scan QR code');
-        // Navigate to QR scanner
+      showScanQRModal().then((data) => {
+        setSerialNumber(data);
+      }).catch((error) => {
+        console.log('Error scanning QR code:', error);
+      });
     };
 
     const handleContinue = () => {

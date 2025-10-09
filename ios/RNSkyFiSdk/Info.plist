@@ -33,9 +33,11 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-    <string>Cam</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Mic</string>
+	<string>$(PRODUCT_NAME) needs access to your Camera.</string>
+
+	<!-- optionally, if you want to record audio: -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>$(PRODUCT_NAME) needs access to your Microphone.</string>
     <key>UIBackgroundModes</key>
     <array>
         <string>audio</string>
