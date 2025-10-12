@@ -9,14 +9,12 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const StartVideoCallScreen = () => {
+const StartVideoCallScreen = ({ onPressStart, onPressHome }: { onPressStart: () => void, onPressHome: () => void }) => {
     const styles = useStyles();
     const navigation = useNavigation<NavigationProp>();
 
     const handleStartVideoCall = () => {
         console.log('Starting video call...');
-        // Navigate to video call screen with room parameter
-        // navigation.navigate('Meeting', { room: 'default-room' });
     };
 
     return (
@@ -76,7 +74,7 @@ const StartVideoCallScreen = () => {
                 <View style={styles.bottomContainer}>
                     <Button
                         title="Bắt đầu cuộc gọi Video"
-                        onPress={handleStartVideoCall}
+                        onPress={() => onPressStart()}
                         containerStyle={styles.buttonContainer}
                         buttonStyle={styles.button}
                         titleStyle={styles.buttonText}

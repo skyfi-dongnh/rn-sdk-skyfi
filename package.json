@@ -40,6 +40,7 @@
     "react-native-orientation-locker": "https://github.com/jitsi/react-native-orientation-locker.git#fe095651d819cf134624f786b61fc8667862178a",
     "react-native-pager-view": "6.8.1",
     "react-native-performance": "5.1.2",
+    "react-native-permissions": "^5.4.2",
     "react-native-safe-area-context": "5.5.2",
     "react-native-screens": "4.11.1",
     "react-native-sound": "https://github.com/jitsi/react-native-sound.git#ea13c97b5c2a4ff5e0d9bacbd9ff5e4457fe2c3c",
@@ -53,6 +54,7 @@
     "react-native-webrtc": "124.0.4",
     "react-native-webview": "13.13.5",
     "react-native-worklets-core": "https://github.com/jitsi/react-native-worklets-core.git#8c5dfab2a5907305da8971696a781b60f0f9cb18",
+    "socket.io-client": "^4.8.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

@@ -57,7 +57,12 @@ const HomeScreen: React.FC = ({ }) => {
   const styles = useStyles({ fullWidth: true });
 
   const onMoveVideoCall = () => {
-    navigation.navigate('StartVideoCall')
+    navigation.navigate('Meeting', {
+      "phoneNumber": "84707000354",
+      "currentSerial": "25101386848211",
+      "detail_id": "250"
+    })
+
     // navigation.navigate('Meeting', { room: '0879999328' });
   };
 

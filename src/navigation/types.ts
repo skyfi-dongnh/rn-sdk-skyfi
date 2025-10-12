@@ -9,6 +9,6 @@ export type RootStackParamList = {
     SignTheContract: undefined;
     ModalExamples: undefined;
     SimpleModalTest: undefined;
-    Meeting: { room: string };
+    Meeting: { phoneNumber: string, currentSerial: string, detail_id: string };
 
 };
