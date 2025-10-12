@@ -1,36 +1,37 @@
-import * as React from 'react';
-import { View, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Button, makeStyles, Text } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
+import { Button, makeStyles, Text } from '@rneui/themed';
+import * as React from 'react';
+import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
 import type { RootStackParamList } from '../../navigation/types';
+import { useActiveSimStore } from '../../store';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const DoubleCheckInfoScreen = () => {
     const styles = useStyles();
     const navigation = useNavigation<NavigationProp>();
+    const { data}= useActiveSimStore();
 
     const personalInfo = [
-        { label: 'Họ và tên', value: 'Nguyễn Thị Thuỳ Linh' },
-        { label: 'Giới tính', value: 'Nữ' },
-        { label: 'Số Căn cước công dân', value: '019196444134' },
-        { label: 'Ngày sinh', value: '25/03/1995' },
+        { label: 'Họ và tên', value: data?.fullName || '' },
+        { label: 'Giới tính', value: data?.gender === 'Female' ? 'Nữ' : 'Nam' },
+        { label: 'Số Căn cước công dân', value: data?.idNumber || '' },
+        { label: 'Ngày sinh', value: data?.birthDay || '' },
     ];
 
     const dateInfo = [
-        { label: 'Ngày cấp', value: '14/08/2021' },
-        { label: 'Ngày hết hạn', value: '14/08/2029' },
+        { label: 'Ngày cấp', value: data?.issueDate || '' },
+        { label: 'Ngày hết hạn', value: data?.expired_date || '' },
     ];
 
     const addressInfo = [
-        { label: 'Nơi cấp', value: 'Công an Thành phố Hà Nội' },
-        { label: 'Nơi thường trú', value: 'Peakview - Số 36 Hoàng Cầu, Ô Chợ Dừa, Đống Đa, Hà Nội' },
-        { label: 'Địa chỉ hiện tại', value: '34 đường Quang Trung, Phường Quang' },
+        { label: 'Nơi cấp', value: data?.issuePlace || '' },
+        { label: 'Nơi thường trú', value: data?.homeTown || '' },
+        { label: 'Địa chỉ hiện tại', value: data?.address || '' },
     ];
 
     const handleContinue = () => {
-        console.log('Continue to next step');
         navigation.navigate('SignTheContract');
     };
 
@@ -146,7 +147,7 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 8,
-    },
+    } as any,
     stepDot: {
         flex: 1,
         height: 4,
@@ -169,7 +170,7 @@ const useStyles = makeStyles((theme) => ({
     form: {
         padding: 16,
         gap: 12,
-    },
+    } as any,
     title: {
         fontSize: 22,
         fontWeight: '700',
@@ -179,11 +180,11 @@ const useStyles = makeStyles((theme) => ({
     },
     infoSection: {
         gap: 4,
-    },
+    } as any,
     infoItem: {
         gap: 4,
         paddingVertical: 4,
-    },
+    } as any,
     infoLabel: {
         fontSize: 14,
         fontWeight: '400',
@@ -204,7 +205,7 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
         gap: 4,
         paddingVertical: 4,
-    },
+    } as any,
     bottomContainer: {
         backgroundColor: '#FFFFFF',
         borderTopLeftRadius: 16,

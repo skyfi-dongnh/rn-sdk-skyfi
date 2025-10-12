@@ -4,3 +4,4 @@ export type { AuthStore } from './authSlice';
 
 export { useAppStore, appSelectors } from './appSlice';
 export type { AppStore } from './appSlice';
+export { useActiveSimStore } from './activeSim';

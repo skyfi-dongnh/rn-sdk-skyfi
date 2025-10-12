@@ -3,8 +3,8 @@ export * from './slices';
 
 // Optional: Export combined store initialization hook
 import { useEffect } from 'react';
-import { useAuthStore } from './slices/authSlice';
 import { useAppStore } from './slices/appSlice';
+import { useAuthStore } from './slices/authSlice';
 
 /**
  * Initialize all stores
@@ -13,6 +13,7 @@ import { useAppStore } from './slices/appSlice';
 export const useInitializeStores = () => {
   const loadStoredAuth = useAuthStore((state) => state.loadStoredAuth);
   const loadAppSettings = useAppStore((state) => state.loadAppSettings);
+
 
   useEffect(() => {
     // Load stored data on app start
