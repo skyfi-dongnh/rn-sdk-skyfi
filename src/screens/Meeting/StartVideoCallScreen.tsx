@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import { Button, makeStyles, Text } from '@rneui/themed';
+import { Button, makeStyles, Text, Image } from '@rneui/themed';
 import * as React from 'react';
 import { Dimensions, SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
 import type { RootStackParamList } from '../../navigation/types';
@@ -40,16 +40,14 @@ const StartVideoCallScreen = () => {
                         {/* Video Call Preview/Illustration */}
                         <View style={styles.previewContainer}>
                             <View style={styles.previewImage}>
-                                {/* This would be replaced with actual image or illustration */}
-                                <View style={styles.phoneIllustration}>
-                                    <View style={styles.phoneScreen}>
-                                        <View style={styles.phoneHeader} />
-                                        <View style={styles.phoneContent}>
-                                            <View style={styles.videoCallIcon} />
-                                            <Text style={styles.phoneText}>Video Call</Text>
-                                        </View>
-                                    </View>
-                                </View>
+                                <Image
+                                    resizeMode="contain"
+                                    source={require('../../assets/images/phone-illustration.png')}
+                                    style={{
+                                        width: screenWidth * 0.7,
+                                        height: (screenWidth * 0.6 * 160) / 120,
+                                    }}
+                                />
                             </View>
                         </View>
 
@@ -83,8 +81,6 @@ const StartVideoCallScreen = () => {
                         buttonStyle={styles.button}
                         titleStyle={styles.buttonText}
                     />
-                    {/* Home Indicator */}
-                    <View style={styles.homeIndicator} />
                 </View>
             </View>
         </SafeAreaView>

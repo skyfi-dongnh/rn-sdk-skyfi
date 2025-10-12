@@ -56,6 +56,11 @@ const HomeScreen: React.FC = ({ }) => {
   const { t } = useI18n();
   const styles = useStyles({ fullWidth: true });
 
+  const onMoveVideoCall = () => {
+    navigation.navigate('StartVideoCall')
+    // navigation.navigate('Meeting', { room: '0879999328' });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -67,7 +72,7 @@ const HomeScreen: React.FC = ({ }) => {
 
         <Button
           title={t('home.startCall')}
-          onPress={() => navigation.navigate('Meeting', { room: '0879999328' })}
+          onPress={onMoveVideoCall}
         />
         {/* button open Active Sim Flow */}
         <Button
