@@ -64,6 +64,14 @@ export const RootNavigator = () => (
         headerShown: false,
       }}
     />
+    {/* StartVideoCallScreen */}
+    <RootStack.Screen
+      component={require('../screens/Meeting/StartVideoCallScreen').default}
+      name="StartVideoCall"
+      options={{
+        headerShown: false,
+      }}
+    />
 
   </RootStack.Navigator>
 );
