@@ -36,6 +36,12 @@ const ActivateApi: Activate.ActivateAPI = {
 			headers: configVideoCall,
 			baseURL: baseURL
 		}).then(res => res.data);
+	},
+	saveLogVideoCall: async (param) => {
+		return axiosInstance.post('/bss/videocall/save-log-video-call', param).then(res => res.data);
+	},
+	getContract: async (param) => {
+		return axiosInstance.post('/bss/videocall/get_img4_app', param).then(res => res.data);
 	}
 };
 export default ActivateApi;

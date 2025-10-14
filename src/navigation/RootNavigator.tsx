@@ -13,7 +13,7 @@ import VideoCallScreen from '../screens/Meeting/VideoCallScreen';
 const RootStack = createStackNavigator();
 
 export const RootNavigator = () => (
-  <RootStack.Navigator initialRouteName="Home">
+  <RootStack.Navigator id={undefined} initialRouteName="Home">
     <RootStack.Screen
       component={HomeScreen}
       name="Home"

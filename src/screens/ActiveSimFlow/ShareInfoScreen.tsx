@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { View, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Button, makeStyles, Text } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
+import { Button, makeStyles, Text } from '@rneui/themed';
+import * as React from 'react';
+import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
 import type { RootStackParamList } from '../../navigation/types';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -246,8 +246,8 @@ const useStyles = makeStyles((theme) => ({
         borderLeftWidth: 2,
         borderBottomWidth: 2,
         borderColor: '#FFFFFF',
-        transform: [{ rotate: '-45deg' }, { translateY: -1 }],
-    },
+        transform: [{ rotate: '-45deg' as any }, { translateY: -1 }],
+    } as any,
     checkboxTextContainer: {
         flex: 1,
         paddingTop: 2,

@@ -1,12 +1,12 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { Dimensions, Alert, View } from 'react-native';
 import { JitsiMeeting } from '@jitsi/react-native-sdk';
 import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Dimensions, View } from 'react-native';
 import { io } from "socket.io-client";
 
+import { JitsiFlags } from '../../utils';
 import StartVideoCallScreen from './StartVideoCallScreen';
 import WaitingVideoCallScreen from './WaitingVideoCallScreen';
-import { JitsiFlags, requestPermission } from '../../utils';
 
 const { width, height } = Dimensions.get('window');
 

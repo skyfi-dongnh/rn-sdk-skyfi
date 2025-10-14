@@ -48,6 +48,7 @@ const InputInfoSimScreen = () => {
             if (res.code === 200 && res.result) {
                 setSerialNumber(res.result.iccid);
                 setPhoneNumber(res.result.msisdn);
+                setData({ ...data,  imsi: res.result.imsi, phone: res.result.msisdn, seri: res.result.iccid });
             } else {
                 throw new Error('Không tìm thấy thông tin ICCD. Vui lòng thử lại.');
             }

@@ -1,10 +1,16 @@
-import * as React from 'react';
-import { View, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Button, makeStyles, Text } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import type { RootStackParamList } from '../../navigation/types';
 import { Image } from '@rneui/base';
+import { Button, makeStyles, Text } from '@rneui/themed';
+import * as React from 'react';
+import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
+import SignatureCanvas from 'react-native-signature-canvas';
+
+import { showPdfViewerModal } from '../../components/modals/ModalPdfViewer';
+import { useLoading } from '../../hooks';
+import type { RootStackParamList } from '../../navigation/types';
+import ActivateApi from '../../services/api/activate.api';
+import { useActiveSimStore } from '../../store';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -12,12 +18,20 @@ const SignTheContractScreen = () => {
     const styles = useStyles();
     const navigation = useNavigation<NavigationProp>();
     const [isAgreed, setIsAgreed] = React.useState(false);
-    const [signature, setSignature] = React.useState<string | null>(null);
+    const { data, setData } = useActiveSimStore();
+    const signatureRef = React.useRef<any>(null);
+    const [isSigning, setIsSigning] = React.useState(false);
+    const { close, load } = useLoading();
+    const [contractUrl, setContractUrl] = React.useState<string>('');
 
-    const handleUploadSignature = () => {
-        console.log('Upload signature');
-        setSignature('signature-uploaded');
-        // Open image picker or signature pad
+    const handleSignature = (signature: string) => {
+        setData({ ...data, img4: signature.replace('data:image/png;base64,', '') });
+    };
+
+    const handleClearSignature = () => {
+        signatureRef.current?.clearSignature();
+        setIsSigning(false);
+        setData({ ...data, img4: '' });
     };
 
     const handlePolicyPress = () => {
@@ -25,17 +39,67 @@ const SignTheContractScreen = () => {
         // Navigate to policy page
     };
 
-    const handleContractPress = () => {
+    const getContract = async () => {
+        load();
+        try {
+            const { img1, img2, img3, ...newData } = data
+            const response = await ActivateApi.getContract(newData);
+            if (response.code === 200) {
+                setContractUrl(response.result);
+            }
+        } catch (error) {
+            console.error('Failed to get contract:', error);
+        } finally {
+            close();
+        }
+    };
+
+    const handleContractPress = async () => {
         console.log('Press tại đây');
-        // Navigate to contract page
+        // Open PDF viewer modal with contract
+        try {
+            await showPdfViewerModal({
+                pdfSource: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Replace with your contract PDF URL
+                title: 'Hợp đồng dịch vụ',
+                showPageNumbers: true,
+                enablePaging: true,
+                onLoadComplete: (numberOfPages, filePath) => {
+                    console.log(`Contract loaded: ${numberOfPages} pages`);
+                },
+                onError: (error) => {
+                    console.error('Failed to load contract:', error);
+                },
+            });
+        } catch (error) {
+            console.log('User closed contract viewer', error);
+        }
     };
 
     const handleContinue = () => {
-        console.log('Continue with signature');
-        // Navigate to next screen
+        signatureRef.current?.readSignature();
     };
 
-    const isButtonDisabled = !isAgreed || !signature;
+    const isButtonDisabled = !isAgreed || !isSigning;
+
+    React.useEffect(() => {
+        getContract();
+    }, [data.img4]);
+
+
+
+    const saveLogVideoCall = async () => {
+        try {
+            load();
+           const response = await ActivateApi.saveLogVideoCall(data);
+           if (response.code === 200) {
+               console.log('Video call log saved successfully', response.result);
+           }
+        } catch (error) {
+            console.error('Failed to save video call log:', error);
+        } finally {
+            close();
+        }
+    };
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -83,21 +147,21 @@ const SignTheContractScreen = () => {
                             {/* Terms Text */}
                             <View>
                                 <Text style={styles.termsText}>
-                                    Việc đăng ký thông tin thuê bao trên hệ thống sẽ chỉ được thực hiện sau khi cung cấp
-                                    đầy đủ các giấy tờ, thông tin theo quy định của pháp luật.{'\n\n'}
-                                    Trong quá trình chờ và sau khi hoàn thành đăng ký thông tin trên hệ thống, nếu có xảy
+                                    ✣ Việc đăng ký thông tin thuê bao trên hệ thống sẽ chỉ được thực hiện sau khi cung cấp
+                                    đầy đủ các giấy tờ, thông tin theo quy định của pháp luật.{'\n'}
+                                    ✣ Trong quá trình chờ và sau khi hoàn thành đăng ký thông tin trên hệ thống, nếu có xảy
                                     ra bất kỳ khiếu kiện, tranh chấp nào liên quan đến số thuê bao trên, tôi đồng ý để
                                     SkyFi thu hồi số thuê bao để giải quyết khiếu nại, đồng thời tôi cam kết sẽ phối hợp
-                                    SkyFi để giải quyết và chịu hoàn toàn trách nhiệm trước pháp luật.{'\n\n'}
-                                    Các thông tin và chữ ký của bạn sẽ được tự đồng điền vào Phiếu xác nhận thông tin
-                                    thuê bao dưới đây.{'\n\n'}
+                                    SkyFi để giải quyết và chịu hoàn toàn trách nhiệm trước pháp luật.{'\n'}
+                                    ✣ Các thông tin và chữ ký của bạn sẽ được tự đồng điền vào Phiếu xác nhận thông tin
+                                    thuê bao dưới đây.{''}
                                 </Text>
                                 <Text style={styles.termsText}>
                                     <Text
                                         style={styles.termsLinkText}
                                         onPress={handlePolicyPress}
                                     >
-                                        Chính sách xử lý và bảo vệ dữ liệu cá nhân
+                                        ✣ Chính sách xử lý và bảo vệ dữ liệu cá nhân
                                     </Text>
                                 </Text>
                             </View>
@@ -122,19 +186,42 @@ const SignTheContractScreen = () => {
                                     />
                                 </View>
                                 <Text style={styles.signatureTitle}>Chữ ký khách hàng</Text>
+                                <TouchableOpacity onPress={handleClearSignature} style={styles.clearButton}>
+                                    <Text style={styles.clearButtonText}>Xóa</Text>
+                                </TouchableOpacity>
                             </View>
-                            <TouchableOpacity
-                                style={styles.signatureUploadArea}
-                                onPress={handleUploadSignature}
-                                activeOpacity={0.8}
-                            >
-                                {!signature && (
-                                    <View style={styles.signatureEmptyState}>
-                                        <View style={styles.uploadIcon} />
-                                        <Text style={styles.uploadText}>Chụp/ Tải ảnh chữ ký mẫu</Text>
-                                    </View>
-                                )}
-                            </TouchableOpacity>
+                            <View style={styles.signatureCanvasWrapper}>
+                                <SignatureCanvas
+                                    ref={signatureRef}
+                                    onOK={handleSignature}
+                                    onEmpty={() => console.log('Empty signature')}
+
+                                    onBegin={() => {
+                                        setIsSigning(true);
+                                    }}
+                                    onEnd={() => {
+                                       signatureRef.current?.readSignature();
+                                    }}
+                                    penColor="#0000EA"
+                                    webStyle={`.m-signature-pad--footer {
+                                        display: none;
+                                    }
+                                    .m-signature-pad {
+                                        box-shadow: none;
+                                        border: none;
+                                    }
+                                    body, html {
+                                        width: 100%;
+                                        height: 100%;
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+                                    canvas {
+                                        border: 1px dashed #E5E5E5;
+                                        border-radius: 8px;
+                                    }`}
+                                />
+                            </View>
                         </View>
                     </View>
                 </ScrollView>
@@ -143,7 +230,7 @@ const SignTheContractScreen = () => {
                 <View style={styles.bottomContainer}>
                     <Button
                         title="Tiếp tục"
-                        onPress={handleContinue}
+                        onPress={saveLogVideoCall}
                         disabled={isButtonDisabled}
                         containerStyle={styles.buttonContainer}
                         buttonStyle={styles.button}
@@ -214,7 +301,7 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
     },
     scrollContent: {
-        paddingBottom: 100,
+
     },
     form: {
         padding: 16,
@@ -256,7 +343,7 @@ const useStyles = makeStyles((theme) => ({
         borderLeftWidth: 2,
         borderBottomWidth: 2,
         borderColor: '#FFFFFF',
-        transform: [{ rotate: '-45deg' }, { translateY: -1 }],
+        transform: [{ rotate: '-45deg' as any }, { translateY: -1 }] as any,
     },
     checkboxText: {
         flex: 1,
@@ -268,7 +355,6 @@ const useStyles = makeStyles((theme) => ({
     termsText: {
         fontSize: 12,
         fontWeight: '400',
-        lineHeight: 18,
         color: '#333333',
     },
     termsLinkText: {
@@ -300,7 +386,17 @@ const useStyles = makeStyles((theme) => ({
     signatureHeader: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         gap: 8,
+    },
+    clearButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    clearButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: theme.colors.secondary,
     },
     signatureIcon: {
         width: 36,
@@ -322,34 +418,12 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: '700',
         lineHeight: 24,
         color: '#27272A',
+        flex: 1,
     },
-    signatureUploadArea: {
+    signatureCanvasWrapper: {
         height: 250,
         backgroundColor: '#FFFFFF',
         borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#E5E5E5',
-        borderStyle: 'dashed',
-    },
-    signatureEmptyState: {
-        alignItems: 'center',
-        gap: 12,
-    },
-    uploadIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: '#F5F5F5',
-        borderWidth: 2,
-        borderColor: '#D93843',
-    },
-    uploadText: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 21,
-        color: '#A1A1A1',
     },
     bottomContainer: {
         backgroundColor: '#FFFFFF',
@@ -365,7 +439,7 @@ const useStyles = makeStyles((theme) => ({
     },
     buttonContainer: {
         width: '100%',
-        marginBottom: 8,
+
     },
     button: {
         backgroundColor: theme.colors.primary,

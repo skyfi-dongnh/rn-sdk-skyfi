@@ -6,6 +6,8 @@ namespace Activate {
 		checkIsCanRegisterSim(id: string): Promise<Response<any>>;
 		getKycOcr(image_front_base64: string, image_back_base64: string): Promise<Response<ResponseKycFront>>;
 		getFaceMatch(image_front_base64: string, image_face_base64: string): Promise<Response<ResponseFaceMatch>>;
+		saveLogVideoCall(param: paramSaveLog): Promise<Response<any>>;
+		getContract(param:Omit<paramSaveLog, 'img1'|'img2'|'img3'|'img4'>): Promise<Response<any>>;
 	}
 
 	interface ParamInfoIccd {
