@@ -23,6 +23,7 @@ const InputInfoSimScreen = () => {
     const [serialNumber, setSerialNumber] = React.useState('');
     const [isFocused, setIsFocused] = React.useState(false);
     const [currentType, setCurrentType] = React.useState<'front' | 'back' | 'face' | 'done'>('front');
+    const [isFist, setIsFirst] = React.useState(true);
     const { data, setData } = useActiveSimStore();
 
     const { load, close } = useLoading();
@@ -48,7 +49,7 @@ const InputInfoSimScreen = () => {
             if (res.code === 200 && res.result) {
                 setSerialNumber(res.result.iccid);
                 setPhoneNumber(res.result.msisdn);
-                setData({ ...data,  imsi: res.result.imsi, phone: res.result.msisdn, seri: res.result.iccid });
+                setData({ ...data, imsi: res.result.imsi, phone: res.result.msisdn, seri: res.result.iccid });
             } else {
                 throw new Error('Không tìm thấy thông tin ICCD. Vui lòng thử lại.');
             }
@@ -82,6 +83,11 @@ const InputInfoSimScreen = () => {
                     subtitle: 'Mặt trước',
                     cameraPosition: 'back',
                 });
+                if (!cardFront) {
+                    setCurrentType('front');
+                    return;
+                }
+
                 await getKycFront(cardFront.base64.replace('data:image/jpeg;base64,', ''));
                 setData({ ...data, img1: cardFront.base64.replace('data:image/jpeg;base64,', '') });
                 setCurrentType('back');
@@ -93,6 +99,10 @@ const InputInfoSimScreen = () => {
                     cameraPosition: 'back',
 
                 });
+                if (!cardBack) {
+                    setCurrentType('front');
+                    return;
+                }
                 const resKycOcr = await getKycOcr(
                     data.img1,
                     cardBack.base64.replace('data:image/jpeg;base64,', '')
@@ -122,6 +132,10 @@ const InputInfoSimScreen = () => {
                     subtitle: 'Đảm bảo khuôn mặt rõ nét, không đeo khẩu trang',
                     cameraPosition: 'front',
                 });
+                if (!face) {
+                    setCurrentType('back');
+                    return;
+                }
                 const resFaceMatch = await getFaceMatch(
                     data.img1,
                     face.base64.replace('data:image/jpeg;base64,', '')
@@ -135,6 +149,8 @@ const InputInfoSimScreen = () => {
             }
             if (currentType === 'done') {
                 navigation.navigate('DoubleCheckInfo');
+                setIsFirst(true);
+                setCurrentType('front');
             }
 
 
@@ -324,8 +340,10 @@ const InputInfoSimScreen = () => {
     }
 
     React.useEffect(() => {
-        if (currentType != 'front') {
+        if (!isFist) {
             handleContinue();
+        } else {
+            setIsFirst(false);
         }
     }, [currentType]);
 

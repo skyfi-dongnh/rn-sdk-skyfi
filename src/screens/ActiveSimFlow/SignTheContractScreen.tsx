@@ -59,7 +59,7 @@ const SignTheContractScreen = () => {
         // Open PDF viewer modal with contract
         try {
             await showPdfViewerModal({
-                pdfSource: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Replace with your contract PDF URL
+                pdfSource: contractUrl, // Replace with your contract PDF URL
                 title: 'Hợp đồng dịch vụ',
                 showPageNumbers: true,
                 enablePaging: true,
@@ -82,7 +82,10 @@ const SignTheContractScreen = () => {
     const isButtonDisabled = !isAgreed || !isSigning;
 
     React.useEffect(() => {
-        getContract();
+        if (data.img4) {
+            getContract();
+
+        }
     }, [data.img4]);
 
 
@@ -90,10 +93,10 @@ const SignTheContractScreen = () => {
     const saveLogVideoCall = async () => {
         try {
             load();
-           const response = await ActivateApi.saveLogVideoCall(data);
-           if (response.code === 200) {
-               console.log('Video call log saved successfully', response.result);
-           }
+            const response = await ActivateApi.saveLogVideoCall(data);
+            if (response.code === 200) {
+                console.log('Video call log saved successfully', response.result);
+            }
         } catch (error) {
             console.error('Failed to save video call log:', error);
         } finally {
@@ -200,7 +203,7 @@ const SignTheContractScreen = () => {
                                         setIsSigning(true);
                                     }}
                                     onEnd={() => {
-                                       signatureRef.current?.readSignature();
+                                        signatureRef.current?.readSignature();
                                     }}
                                     penColor="#0000EA"
                                     webStyle={`.m-signature-pad--footer {

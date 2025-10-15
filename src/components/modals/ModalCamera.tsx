@@ -661,7 +661,7 @@ export const showCameraModal = (options?: {
 	subtitle?: string;
 	cameraPosition?: 'back' | 'front';
 }) => {
-	return new Promise<PhotoData>((resolve, reject) => {
+	return new Promise<PhotoData | null>((resolve, reject) => {
 		modal.showBottomSheet({
 			render: (
 				<ModalCamera
@@ -675,7 +675,7 @@ export const showCameraModal = (options?: {
 				resolve(data as PhotoData);
 			},
 			onClose: () => {
-				reject(new Error('User cancelled'));
+				resolve(null);
 			},
 			props: {
 				closeOnBackdrop: false,

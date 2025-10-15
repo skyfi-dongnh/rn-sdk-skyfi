@@ -68,6 +68,14 @@ export const ModalPdfViewer: React.FC<ModalPdfViewerProps> = ({
 	// Normalize PDF source
 	const getPdfSource = () => {
 		if (typeof pdfSource === 'string') {
+			// If it's a base64 string
+			if (pdfSource.startsWith('data:application/pdf;base64,')) {
+				return { uri: pdfSource };
+			}
+			// If it's base64 without the data URI prefix
+			if (pdfSource.match(/^[A-Za-z0-9+/]+=*$/)) {
+				return { uri: `data:application/pdf;base64,${pdfSource}` };
+			}
 			// If it's a URL
 			if (pdfSource.startsWith('http://') || pdfSource.startsWith('https://')) {
 				return { uri: pdfSource, cache: true };
@@ -90,7 +98,7 @@ export const ModalPdfViewer: React.FC<ModalPdfViewerProps> = ({
 			{/* Header */}
 			<View style={styles.header}>
 				<TouchableOpacity style={styles.backButton} onPress={handleClose}>
-					<Icon name="chevron-left" type="feather" size={24} color="#333" />
+					<Icon name="close" type="material" size={24} color="#333" />
 				</TouchableOpacity>
 				<Text style={styles.headerTitle} numberOfLines={1}>
 					{title}
@@ -102,7 +110,7 @@ export const ModalPdfViewer: React.FC<ModalPdfViewerProps> = ({
 			<View style={styles.pdfContainer}>
 				{error ? (
 					<View style={styles.errorContainer}>
-						<Icon name="alert-circle" type="feather" size={64} color="#FF3B30" />
+						<Icon name="error-outline" type="material" size={64} color="#FF3B30" />
 						<Text style={styles.errorTitle}>Unable to load PDF</Text>
 						<Text style={styles.errorMessage}>{error}</Text>
 						<Button

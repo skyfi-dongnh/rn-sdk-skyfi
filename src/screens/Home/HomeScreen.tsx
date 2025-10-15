@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LanguageSwitcher } from '../../components/common';
+import { showPdfViewerModal } from '../../components/modals/ModalPdfViewer';
 import { useI18n } from '../../hooks';
 import { RootStackParamList } from '../../navigation';
 
@@ -65,6 +66,26 @@ const HomeScreen: React.FC = ({ }) => {
 
     // navigation.navigate('Meeting', { room: '0879999328' });
   };
+   const handleContractPress = async () => {
+          console.log('Press tại đây');
+          // Open PDF viewer modal with contract
+          try {
+              await showPdfViewerModal({
+                  pdfSource: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Replace with your contract PDF URL
+                  title: 'Hợp đồng dịch vụ',
+                  showPageNumbers: true,
+                  enablePaging: true,
+                  onLoadComplete: (numberOfPages, filePath) => {
+                      console.log(`Contract loaded: ${numberOfPages} pages`);
+                  },
+                  onError: (error) => {
+                      console.error('Failed to load contract:', error);
+                  },
+              });
+          } catch (error) {
+              console.log('User closed contract viewer', error);
+          }
+      };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -87,6 +108,10 @@ const HomeScreen: React.FC = ({ }) => {
         <Button
           title="Modal Examples"
           onPress={() => navigation.navigate('ModalExamples')}
+        />
+        <Button
+          title="Modal Examples PDF"
+          onPress={handleContractPress}
         />
       </View>
     </SafeAreaView>
