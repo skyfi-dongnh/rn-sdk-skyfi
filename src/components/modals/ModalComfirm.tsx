@@ -5,24 +5,27 @@ import { modal, useModal } from "../common";
 
 type ModalProps = {
 	title: string;
-	description: string;
+	description: string | React.ReactNode;
 	closeLabel?: string;
 	confirmLabel?: string;
 	onClose?(): void;
 	onConfirm?(): void;
 	closeOnBackdrop?: boolean;
+	textAlign?: 'left' | 'center' | 'right';
 }
 
-const ConfirmModalContent = ({ title, description, closeLabel, confirmLabel }: ModalProps) => {
+const ConfirmModalContent = ({ title, description, closeLabel, confirmLabel, textAlign='center' }: ModalProps) => {
 	const { close, done } = useModal();
 	return (
 		<View style={styles.modalContent}>
 			{/* Header */}
 			<View style={styles.header}>
 				<Text style={styles.title}>{title}</Text>
-				<Text style={styles.description}>
-					{description}
-				</Text>
+				{typeof description === 'string' ? (
+					<Text style={{...styles.description, textAlign }}>{description}</Text>
+				) : (
+					description
+				)}
 			</View>
 
 			{/* Buttons */}

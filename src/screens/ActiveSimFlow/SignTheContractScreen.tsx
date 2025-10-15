@@ -55,8 +55,7 @@ const SignTheContractScreen = () => {
     };
 
     const handleContractPress = async () => {
-        console.log('Press tại đây');
-        // Open PDF viewer modal with contract
+
         try {
             await showPdfViewerModal({
                 pdfSource: contractUrl, // Replace with your contract PDF URL
@@ -84,7 +83,6 @@ const SignTheContractScreen = () => {
     React.useEffect(() => {
         if (data.img4) {
             getContract();
-
         }
     }, [data.img4]);
 
@@ -95,7 +93,11 @@ const SignTheContractScreen = () => {
             load();
             const response = await ActivateApi.saveLogVideoCall(data);
             if (response.code === 200) {
-                console.log('Video call log saved successfully', response.result);
+                navigation.navigate('Meeting', {
+                    "phoneNumber": response.result.phone,
+                    "currentSerial": response.result.id,
+                    "detail_id": response.result.detail_id.toString(),
+                })
             }
         } catch (error) {
             console.error('Failed to save video call log:', error);

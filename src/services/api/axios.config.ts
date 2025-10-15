@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestCo
 
 // API Configuration
 const API_CONFIG = {
-  baseURL: 'https://bss-api.skyfi.pro/api', // Replace with your API base URL
+  baseURL: 'https://bss-api.skyfi.network/api', // Replace with your API base URL
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',

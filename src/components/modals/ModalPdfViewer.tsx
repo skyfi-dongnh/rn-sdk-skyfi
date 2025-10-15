@@ -287,8 +287,6 @@ export const showPdfViewerModal = (options: {
 	onError?: (error: Error) => void;
 }) => {
 	return new Promise<void>((resolve, reject) => {
-		console.log('Showing PDF Viewer Modal with source:', options.pdfSource);
-
 		modal.showBottomSheet({
 			render: (
 				<ModalPdfViewer
