@@ -10,5 +10,6 @@ export type RootStackParamList = {
     ModalExamples: undefined;
     SimpleModalTest: undefined;
     Meeting: { phoneNumber: string, currentSerial: string, detail_id: string };
+    ResultVideoCall: { status: 'success' | 'error' };
 
 };

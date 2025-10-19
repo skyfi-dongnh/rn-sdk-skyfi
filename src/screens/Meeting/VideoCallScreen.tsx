@@ -10,6 +10,7 @@ import { useLoading } from '../../hooks';
 import ActivateApi from '../../services/api/activate.api';
 import { JitsiFlags } from '../../utils';
 import Security from '../../utils/Security';
+import { NavigationProp } from '../Home/HomeScreen';
 import StartVideoCallScreen from './StartVideoCallScreen';
 import WaitingVideoCallScreen from './WaitingVideoCallScreen';
 
@@ -31,7 +32,7 @@ const Meeting = ({ route }: MeetingProps) => {
   const socketRef = useRef<any>(null);
   const { load, close } = useLoading();
   const jitsiURL = JITSI_MEET_URL;
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const { phoneNumber, detail_id, currentSerial } = route.params;
 
 
@@ -150,9 +151,9 @@ const Meeting = ({ route }: MeetingProps) => {
     socket.on("register-result", (data) => {
       setSocketStatus("register-result");
       if (data?.isSuccess) {
-        Alert.alert("Thành công", "Hồ sơ của Bạn đã được xử lý thành công và sẵn sàng sử dụng. Chi tiết LH 0877087087 (0đ cho TB iTel). Trân trọng.");
+        navigation.navigate('ResultVideoCall', { status: 'success' })
       } else {
-        Alert.alert("Thất bại!", "TB đăng ký thất bại. Chi tiết LH 0877087087(0đ cho TB iTel). Trân trọng.");
+        navigation.navigate('ResultVideoCall', { status: 'error' })
       }
     });
 
@@ -163,22 +164,28 @@ const Meeting = ({ route }: MeetingProps) => {
     //admin-reject-client-registration
     socket.on("admin-reject-client-registration", (data) => {
       socketRef.current = "admin-reject-client-registration";
-      // ActionSheets.showAlert({
-      //   title: "Thông báo",
-      //   contentButton: "Chụp lại",
-      //   content:
-      //     "Đăng ký/Cập nhật thất bại do hồ sơ chưa hợp lệ. Vui lòng kiểm tra và thực hiện lại Bạn nhé!",
-      //   onOk: () => {
-      //     onResetToInput();
-      //   },
-      // });
-      Alert.alert("Thông báo", "Đăng ký/Cập nhật thất bại do hồ sơ chưa hợp lệ. Vui lòng kiểm tra và thực hiện lại Bạn nhé!");
+      adminRejectClientRegistration();
     });
 
     return () => {
       socket.disconnect();
     };
   }, []);
+
+  const adminRejectClientRegistration = async () => {
+
+    const status = await showMessage({
+      title: 'Gửi yêu cầu thất bại!',
+      description: 'Đăng ký/Cập nhật thất bại do hồ sơ chưa hợp lệ. Vui lòng kiểm tra và thực hiện lại Bạn nhé!',
+      closeLabel: 'Thực hiện lại',
+      confirmLabel: 'Gửi Video',
+    });
+    if (status) {
+      await saveVideo();
+      return;
+    }
+    onResetHome();
+  }
 
 
   const actionNoTeller = async () => {
@@ -199,6 +206,10 @@ const Meeting = ({ route }: MeetingProps) => {
     console.log('statusRecordVideo', statusRecordVideo);
 
     if (!statusRecordVideo) return;
+    await saveVideo();
+  }
+
+  const saveVideo = async () => {
     const video = await showRecordVideoModal({
       maxDuration: 20, // seconds
       cameraPosition: 'front' // or 'front'
@@ -243,8 +254,6 @@ const Meeting = ({ route }: MeetingProps) => {
     } finally {
       close();
     }
-
-
   }
 
   return (

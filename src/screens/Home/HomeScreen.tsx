@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme, props: Props) => ({
 
 }));
 
-type NavigationProp = StackNavigationProp<RootStackParamList>;
+export type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 
 const HomeScreen: React.FC = ({ }) => {
