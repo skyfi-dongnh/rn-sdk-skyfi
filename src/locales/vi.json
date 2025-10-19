@@ -31,6 +31,21 @@
     "startCall": "Bắt đầu cuộc gọi",
     "moveToActiveFlow": "Kích hoạt SIM"
   },
+  "tabs": {
+    "home": "Trang chủ",
+    "notification": "Thông báo",
+    "support": "Hỗ trợ",
+    "profile": "Cá nhân"
+  },
+  "notification": {
+    "empty": "Chưa có thông báo nào"
+  },
+  "support": {
+    "empty": "Liên hệ hỗ trợ để được giúp đỡ"
+  },
+  "profile": {
+    "empty": "Thông tin cá nhân của bạn sẽ hiển thị ở đây"
+  },
   "meeting": {
     "connecting": "Đang kết nối...",
     "connected": "Đã kết nối",

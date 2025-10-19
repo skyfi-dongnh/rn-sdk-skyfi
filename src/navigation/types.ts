@@ -1,4 +1,5 @@
 export type RootStackParamList = {
+    MainTabs: undefined;
     Home: undefined;
     ShareInfo: undefined;
     InputInfoSim: undefined;
@@ -11,5 +12,11 @@ export type RootStackParamList = {
     SimpleModalTest: undefined;
     Meeting: { phoneNumber: string, currentSerial: string, detail_id: string };
     ResultVideoCall: { status: 'success' | 'error' };
+};
 
+export type BottomTabParamList = {
+    HomeTab: undefined;
+    NotificationTab: undefined;
+    SupportTab: undefined;
+    ProfileTab: undefined;
 };

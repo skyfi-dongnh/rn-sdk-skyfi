@@ -30,7 +30,22 @@
     "subtitle": "Video Call Demo",
     "startCall": "Start Video Call",
     "moveToActiveFlow": "Move to Active SIM Flow"
-    },
+  },
+  "tabs": {
+    "home": "Home",
+    "notification": "Notification",
+    "support": "Support",
+    "profile": "Profile"
+  },
+  "notification": {
+    "empty": "No notifications yet"
+  },
+  "support": {
+    "empty": "Contact support for assistance"
+  },
+  "profile": {
+    "empty": "Your profile information will appear here"
+  },
   "meeting": {
     "connecting": "Connecting...",
     "connected": "Connected",
