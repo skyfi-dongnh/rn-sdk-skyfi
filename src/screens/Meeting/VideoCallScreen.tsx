@@ -16,7 +16,7 @@ const BASE_URL_SOCKET = "https://socket.skyfi.network/";
 const JITSI_MEET_URL = "https://meet.skyfi.network/";
 
 const guidedVideoCallId = `Tất cả các KTV đều đang bận. Vui lòng thực hiện quay Video và làm theo hướng dẫn sau để SkyFi hỗ trợ ĐKTT cho Bạn nhé!
-Bước 1: Để khuôn mặt vào giữa khung hình và bấm  Bắt đầu quay Bước 2: Thực hiện quay trái và quay phải Bước 3: Đọc số thuê bao cần đăng ký Bước 4: Bấm Gửi Video để hoàn tất`; // ID cuộc gọi hướng dẫn
+Bước 1: Để khuôn mặt vào giữa khung hình và bấm Bắt đầu quay Bước 2: Thực hiện quay trái và quay phải Bước 3: Đọc số thuê bao cần đăng ký Bước 4: Bấm Gửi Video để hoàn tất`; // ID cuộc gọi hướng dẫn
 
 interface MeetingProps {
   route: any;
@@ -133,29 +133,7 @@ const Meeting = ({ route }: MeetingProps) => {
     socket.on("no-free-teller", (data) => {
       setSocketStatus("no-teller");
       // _onEndButtonPressMoveRecord(2);
-      showMessage({
-        title: 'Thông báo',
-        description: 'Tất cả các KTV đều đang bận. Nhấn Gọi lại để tiép thực hiện lại cuộc gọi hoặc Đăng ký để Tiếp tục thực hiện ĐKTT thuê bao của Bạn.',
-        closeLabel: 'Đăng ký',
-        confirmLabel: 'Gọi lại',
-        onClose: () => {
-          showMessage({
-            title: 'Thông báo',
-            description: guidedVideoCallId,
-            confirmLabel: 'Bắt đầu quay',
-            textAlign: 'left',
-            onConfirm: async () => {
-              const video = await showRecordVideoModal({
-                maxDuration: 60, // seconds
-                cameraPosition: 'back' // or 'front'
-              });
-              if (video) {
-                console.log('Video recorded:', video.path, video.duration);
-              }
-            }
-          })
-        }
-      })
+      actionNoTeller();
     });
 
     socket.on("admin-send-registration-form", (data) => {
@@ -199,6 +177,33 @@ const Meeting = ({ route }: MeetingProps) => {
     };
   }, []);
 
+
+  const actionNoTeller = async () => {
+    const status = await showMessage({
+      title: 'Thông báo',
+      description: 'Tất cả các KTV đều đang bận. Nhấn Gọi lại để tiép thực hiện lại cuộc gọi hoặc Đăng ký để Tiếp tục thực hiện ĐKTT thuê bao của Bạn.',
+      closeLabel: 'Đăng ký',
+      confirmLabel: 'Gọi lại',
+
+    });
+    if (status) return;
+    const statusRecordVideo = await showMessage({
+      title: 'Thông báo',
+      description: guidedVideoCallId,
+      confirmLabel: 'Bắt đầu quay',
+      textAlign: 'left',
+
+    })
+    if (!statusRecordVideo) return;
+    const video = await showRecordVideoModal({
+      maxDuration: 60, // seconds
+      cameraPosition: 'back' // or 'front'
+    });
+    if (!video) return;
+
+    console.log('Video recorded:', video.path, video.duration);
+
+  }
 
   return (
     <View style={{ flex: 1 }}>

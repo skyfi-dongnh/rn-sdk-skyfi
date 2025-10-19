@@ -47,20 +47,24 @@ const ConfirmModalContent = ({ title, description, closeLabel, confirmLabel, tex
 };
 
 
-export const showMessage = ({closeOnBackdrop,...props}:ModalProps) => {
-	modal.open({
+export const showMessage = async ({closeOnBackdrop,...props}:ModalProps) => {
+ return new Promise<boolean>((resolve) => {
+   modal.open({
 	  render: <ConfirmModalContent {...props} />,
 	  onDone: (data: any) => {
-		props.onConfirm && props.onConfirm();
+		  props.onConfirm && props.onConfirm();
+		  resolve(true);
 	  },
 	  onClose: () => {
-		props.onClose && props.onClose();
+		  props.onClose && props.onClose();
+		  resolve(false);
 	  },
 	  props: {
 		closeOnBackdrop: false,
 	  } as Modal.BaseModal,
 	});
-  };
+  });
+};
 
 const styles = StyleSheet.create({
 
