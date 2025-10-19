@@ -18,6 +18,7 @@ namespace Activate {
     getContract(
       param: Omit<paramSaveLog, 'img1' | 'img2' | 'img3' | 'img4'>,
     ): Promise<Response<string>>;
+    saveVideoNoTeller(param: FormData): Promise<Response<any>>;
   }
 
   interface ParamInfoIccd {

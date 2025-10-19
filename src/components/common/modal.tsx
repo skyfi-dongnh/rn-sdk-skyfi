@@ -93,10 +93,9 @@ const ModalProvider = () => {
                 },
                 async done(data: unknown) {
                     if (newOptions.onDone) await newOptions.onDone(data);
-                    setTimeout(() => {
-                        removeModal(newOptions.modalId);
-                        eventManager.delete(newOptions.modalId);
-                    }, 0);
+                    removeModal(newOptions.modalId);
+                    eventManager.delete(newOptions.modalId);
+
                 }
             };
             const modalProps: Modal.useModalType = {
@@ -119,7 +118,7 @@ const ModalProvider = () => {
 
     // AppModal component for default modal type
     const AppModal = ({ children, visible, props }: { children: React.ReactNode; visible: boolean; props?: Modal.BaseModal }) => {
-       return (
+        return (
             <BaseModal visible={visible} {...props}>
                 {children}
             </BaseModal>

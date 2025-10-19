@@ -1,12 +1,15 @@
 import { JitsiMeeting } from '@jitsi/react-native-sdk';
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Dimensions, View } from 'react-native';
+import { Alert, Dimensions, Platform, View } from 'react-native';
 import { io } from "socket.io-client";
 
 import { showMessage } from '../../components/modals/ModalComfirm';
 import { showRecordVideoModal } from '../../components/modals/ModalRecordVideo';
+import { useLoading } from '../../hooks';
+import ActivateApi from '../../services/api/activate.api';
 import { JitsiFlags } from '../../utils';
+import Security from '../../utils/Security';
 import StartVideoCallScreen from './StartVideoCallScreen';
 import WaitingVideoCallScreen from './WaitingVideoCallScreen';
 
@@ -16,7 +19,7 @@ const BASE_URL_SOCKET = "https://socket.skyfi.network/";
 const JITSI_MEET_URL = "https://meet.skyfi.network/";
 
 const guidedVideoCallId = `Tất cả các KTV đều đang bận. Vui lòng thực hiện quay Video và làm theo hướng dẫn sau để SkyFi hỗ trợ ĐKTT cho Bạn nhé!
-Bước 1: Để khuôn mặt vào giữa khung hình và bấm Bắt đầu quay Bước 2: Thực hiện quay trái và quay phải Bước 3: Đọc số thuê bao cần đăng ký Bước 4: Bấm Gửi Video để hoàn tất`; // ID cuộc gọi hướng dẫn
+Bước 1: Để khuôn mặt vào giữa khung hình và bấm Bắt đầu quay \nBước 2: Thực hiện quay trái và quay phải \nBước 3: Đọc số thuê bao cần đăng ký \nBước 4: Bấm Gửi Video để hoàn tất`; // ID cuộc gọi hướng dẫn
 
 interface MeetingProps {
   route: any;
@@ -26,10 +29,10 @@ const Meeting = ({ route }: MeetingProps) => {
 
   const roomRef = useRef(null);
   const socketRef = useRef<any>(null);
-
+  const { load, close } = useLoading();
   const jitsiURL = JITSI_MEET_URL;
   const navigation = useNavigation();
-  const { phoneNumber, logVideoCallId, currentSerial } = route.params;
+  const { phoneNumber, detail_id, currentSerial } = route.params;
 
 
   const [token, setToken] = useState("");
@@ -192,16 +195,55 @@ const Meeting = ({ route }: MeetingProps) => {
       description: guidedVideoCallId,
       confirmLabel: 'Bắt đầu quay',
       textAlign: 'left',
-
     })
+    console.log('statusRecordVideo', statusRecordVideo);
+
     if (!statusRecordVideo) return;
     const video = await showRecordVideoModal({
-      maxDuration: 60, // seconds
-      cameraPosition: 'back' // or 'front'
+      maxDuration: 20, // seconds
+      cameraPosition: 'front' // or 'front'
     });
     if (!video) return;
 
-    console.log('Video recorded:', video.path, video.duration);
+    const dataForm = new FormData();
+    dataForm.append('id', detail_id);
+    dataForm.append('code', Security.hashSecureCode(detail_id));
+    dataForm.append('files', {
+      uri: Platform.OS === 'ios' ? video.path.replace('file://', '') : video.path,
+      type: 'video/mp4',
+      name: `${detail_id}.mp4`,
+    });
+    load();
+    try {
+      const response = await ActivateApi.saveVideoNoTeller(dataForm);
+      if (response.code === 200) {
+        showMessage({
+          title: 'Thông báo',
+          description: 'Gửi video thành công. Chúng tôi sẽ liên hệ lại với Bạn trong thời gian sớm nhất!',
+          confirmLabel: 'Đồng ý',
+
+        })
+      } else {
+        showMessage({
+          title: 'Thông báo',
+          description: response.message || 'Gửi video thất bại. Vui lòng thử lại sau!',
+          confirmLabel: 'Đồng ý',
+
+        })
+      }
+
+
+    } catch (error) {
+      showMessage({
+        title: 'Thông báo',
+        description: 'Gửi video thất bại. Vui lòng thử lại sau!',
+        confirmLabel: 'Đồng ý',
+
+      })
+    } finally {
+      close();
+    }
+
 
   }
 
