@@ -22,6 +22,11 @@ export const HomePackages: React.FC<HomePackagesProps> = ({
       duration: '/ 30 ngày',
       discount: '30%',
       hasSaleTag: true,
+      isViki: true,
+      vikiPoints: {
+        accumulated: "150đ",
+        required: "150đ"
+      },
       onViewDetails: () => console.log('View details 1'),
       onRegister: () => console.log('Register 1'),
     },

@@ -12,6 +12,8 @@ export type RootStackParamList = {
     SimpleModalTest: undefined;
     Meeting: { phoneNumber: string, currentSerial: string, detail_id: string };
     ResultVideoCall: { status: 'success' | 'error' };
+    SimData: undefined;
+    Checkout: undefined;
 };
 
 export type BottomTabParamList = {

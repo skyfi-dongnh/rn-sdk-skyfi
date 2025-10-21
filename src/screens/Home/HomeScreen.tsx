@@ -108,7 +108,7 @@ const HomeScreen: React.FC = ({}) => {
   };
 
   const handleBuySimPress = () => {
-    Alert.alert('Buy SIM', 'Navigate to SIM purchase flow');
+    navigation.navigate('SimData');
   };
 
   const handleTopUpPress = () => {
@@ -179,7 +179,7 @@ const HomeScreen: React.FC = ({}) => {
             />
           </View>
         </View>
-        <HomeMenu />
+      <HomeMenu onBuySimPress={handleBuySimPress} />
         <HomeSlider slides={slides} autoPlay={true} />
         <HomePackages />
 

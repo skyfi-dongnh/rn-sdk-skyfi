@@ -9,6 +9,7 @@ import SignTheContractScreen from '../screens/ActiveSimFlow/SignTheContractScree
 import BottomTabNavigator from '../screens/BottomTabBar';
 import ResultVideoCall from '../screens/Meeting/ResultVideoCall';
 import VideoCallScreen from '../screens/Meeting/VideoCallScreen';
+import SimDataScreen from '../screens/simData/SimData';
 
 const RootStack = createStackNavigator();
 
@@ -75,6 +76,13 @@ export const RootNavigator = () => (
       <RootStack.Screen
         component={ResultVideoCall}
         name="ResultVideoCall"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <RootStack.Screen
+        component={SimDataScreen}
+        name="SimData"
         options={{
           headerShown: false,
         }}
