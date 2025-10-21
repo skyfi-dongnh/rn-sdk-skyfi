@@ -2,18 +2,16 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { buttonGradientColors } from '../../theme/rneui.theme';
+import SimData from '../../types/simdata';
+import { toCurrency } from '../../utils/format';
+import { IconCall, IconMail, IconSpeed } from '../Svgs';
 import { CustomButton } from './CustomButton';
 
-export interface PackageData {
-  id: string;
-  name: string;
-  data: string;
-  minutes: string;
-  currentPrice: string;
-  originalPrice?: string;
-  duration: string;
-  discount?: string;
-  hasSaleTag?: boolean;
+
+
+interface PackageItemProps {
+  package: SimData.Package;
+  width?: number;
   isViki?: boolean;
   isSelect?: boolean;
   isView?: boolean;
@@ -23,52 +21,42 @@ export interface PackageData {
   };
   onViewDetails?: () => void;
   onRegister?: () => void;
+
 }
 
-interface PackageItemProps {
-  package: PackageData;
-  width?: number;
-}
+const SpeedIcon: React.FC<{ color?: string; desc: string }> = ({ color = '#0000EA', desc }) => {
+  if (desc.includes('data')) return <IconSpeed />;
+  if (desc.includes('sms')) return <IconMail />;
+  return (
+    <IconCall />
+  );
+};
 
-const SpeedIcon: React.FC<{ color?: string }> = ({ color = '#0000EA' }) => (
-  <View style={[styles.iconContainer, { backgroundColor: color }]}>
-    <View style={styles.iconInner}>
-      {/* Speed/Dashboard icon placeholder */}
-      <View style={[styles.iconElement, { backgroundColor: color }]} />
-    </View>
-  </View>
-);
 
-const DiscountTag: React.FC<{ discount: string }> = ({ discount }) => (
-  <View style={styles.discountTag}>
-    <View style={styles.discountIcon} />
-    <Text style={styles.discountText}>{discount}</Text>
-  </View>
-);
 
-export const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, width }) => {
-  const shouldShowBorder = pkg.isViki && pkg.isSelect && !pkg.isView;
+export const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, width, isSelect, isView, isViki, onViewDetails, onRegister, vikiPoints }) => {
+  const shouldShowBorder = isViki && isSelect && !isView;
   const containerStyle = width
     ? [styles.container, shouldShowBorder && styles.vikiContainer, { width }]
     : [styles.container, shouldShowBorder && styles.vikiContainer];
 
   return (
     <View style={containerStyle}>
-      <View style={styles.content}>
+      <View style={[styles.content, { borderColor: isSelect ? '#0000EA' : '#FFFFFF', borderWidth: isSelect ? 2 : 0, borderRadius: 12 }]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.titleSection}>
-            <Text style={[styles.packageName, pkg.isViki && styles.vikiPackageName]}>{pkg.name}</Text>
-            {pkg.isViki && (
+            <Text style={[styles.packageName, isViki && styles.vikiPackageName]}>{pkg.name}</Text>
+            {isViki && (
               <View style={styles.vikiIcon}>
                 <View style={styles.vikiIconInner} />
               </View>
             )}
-            {pkg.hasSaleTag && pkg.discount && !pkg.isViki && (
+            {/* {pkg.hasSaleTag && pkg.discount && !pkg.isViki && (
               <DiscountTag discount={pkg.discount} />
-            )}
+            )} */}
           </View>
-          <TouchableOpacity onPress={pkg.onViewDetails} style={styles.detailsButton}>
+          <TouchableOpacity onPress={onViewDetails} style={styles.detailsButton}>
             <Text style={styles.detailsButtonText}>Xem chi tiết</Text>
           </TouchableOpacity>
         </View>
@@ -78,18 +66,17 @@ export const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, width })
 
         {/* Features */}
         <View style={styles.featuresSection}>
-          <View style={styles.featureRow}>
-            <SpeedIcon color="#0000EA" />
-            <Text style={styles.featureText}>{pkg.data}</Text>
-          </View>
-          <View style={styles.featureRow}>
-            <SpeedIcon color="#0000EA" />
-            <Text style={styles.featureText}>{pkg.minutes}</Text>
-          </View>
+          {pkg.description && pkg.description.map((desc, index) => (
+            <View key={index} style={styles.featureRow}>
+              <SpeedIcon color="#0000EA" desc={desc} />
+              <Text style={styles.featureText}>{desc}</Text>
+            </View>
+          ))}
+
         </View>
 
         {/* Viki Points Section */}
-        {pkg.isViki && pkg.vikiPoints && (
+        {isViki && vikiPoints && (
           <View style={styles.vikiPointsContainer}>
             <LinearGradient
               colors={buttonGradientColors}
@@ -111,14 +98,14 @@ export const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, width })
                 <View style={styles.vikiPointItem}>
                   <Text style={styles.vikiPointLabel}>Tích lũy T9</Text>
                   <View style={styles.vikiPointValue}>
-                    <Text style={styles.vikiPointValueText}>{pkg.vikiPoints.accumulated}</Text>
+                    <Text style={styles.vikiPointValueText}>{vikiPoints.accumulated}</Text>
                   </View>
                 </View>
                 <View style={styles.vikiDivider} />
                 <View style={styles.vikiPointItem}>
                   <Text style={styles.vikiPointLabel}>Cần đạt T9</Text>
                   <View style={styles.vikiPointValue}>
-                    <Text style={styles.vikiPointValueText}>{pkg.vikiPoints.required}</Text>
+                    <Text style={styles.vikiPointValueText}>{vikiPoints.required}</Text>
                   </View>
                 </View>
               </View>
@@ -133,26 +120,26 @@ export const PackageItem: React.FC<PackageItemProps> = ({ package: pkg, width })
         <View style={styles.bottomSection}>
           <View style={styles.priceSection}>
             <View style={styles.priceContainer}>
-              <Text style={[styles.currentPrice, { color: pkg.hasSaleTag ? '#D2008C' : '#ED1B2F' }]}>
-                {pkg.currentPrice}
+              <Text style={[styles.currentPrice, { color: '#ED1B2F' }]}>
+                {toCurrency(pkg.sale_price)}
               </Text>
-              {pkg.originalPrice && (
-                <Text style={styles.originalPrice}>{pkg.originalPrice}</Text>
+              {pkg.price && pkg.price > pkg.sale_price && (
+                <Text style={styles.originalPrice}>{toCurrency(pkg.price)}</Text>
               )}
             </View>
-            <Text style={styles.duration}>{pkg.duration}</Text>
+            {/* <Text style={styles.duration}>{pkg.duration}</Text> */}
           </View>
           <View style={styles.registerSection}>
-            {pkg.isView ? (
-              <TouchableOpacity onPress={pkg.onRegister} style={styles.vikiRadioButton}>
-                <View style={[styles.vikiRadioOuter, pkg.isSelect && styles.vikiRadioOuterSelected]}>
-                  {pkg.isSelect && <View style={styles.vikiRadioInner} />}
+            {!isView ? (
+              <TouchableOpacity onPress={onRegister} style={styles.vikiRadioButton}>
+                <View style={[styles.vikiRadioOuter, isSelect && styles.vikiRadioOuterSelected]}>
+                  {isSelect && <View style={styles.vikiRadioInner} />}
                 </View>
               </TouchableOpacity>
             ) : (
               <CustomButton
                 title="Đăng ký"
-                onPress={pkg.onRegister}
+                onPress={onRegister}
                 type="primary"
                 size="small"
                 style={styles.registerButton}
@@ -300,7 +287,7 @@ const styles = StyleSheet.create({
   priceSection: {
     flex: 1,
     gap: 4,
-    flexDirection:'row'
+    flexDirection: 'row'
   },
   priceContainer: {
     flexDirection: 'column',

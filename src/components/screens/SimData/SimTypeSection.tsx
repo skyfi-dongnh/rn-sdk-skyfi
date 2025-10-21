@@ -1,57 +1,66 @@
 import { Icon } from '@rneui/themed';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import SimData from '../../../types/simdata.d';
+import { toCurrency } from '../../../utils/format';
 
-export type SimType = 'physical' | 'esim';
+
 
 interface SimTypeSectionProps {
-	selectedType: SimType;
-	onTypeChange: (type: SimType) => void;
-	price?: string;
+	selectedType: SimData.SimType;
+	onTypeChange: (type: SimData.SimType) => void;
+	price: number;
+	basePrice?: number;
+
 }
 
-export const SimTypeSection: React.FC<SimTypeSectionProps> = ({ 
-	selectedType, 
+export const SimTypeSection: React.FC<SimTypeSectionProps> = ({
+	selectedType,
 	onTypeChange,
-	price = '0 VND'
+	price,
+	basePrice
 }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.optionsRow}>
 				<View style={styles.radioGroup}>
-					<TouchableOpacity 
+					<TouchableOpacity
 						style={styles.radioOption}
-						onPress={() => onTypeChange('physical')}
+						onPress={() => onTypeChange('USIM')}
 					>
 						<View style={[
 							styles.radioCircle,
-							selectedType === 'physical' && styles.radioCircleSelected
+							selectedType === 'USIM' && styles.radioCircleSelected
 						]}>
-							{selectedType === 'physical' && (
+							{selectedType === 'USIM' && (
 								<View style={styles.radioInner} />
 							)}
 						</View>
 						<Text style={styles.radioLabel}>SIM vật lý</Text>
 					</TouchableOpacity>
-					
-					<TouchableOpacity 
+
+					<TouchableOpacity
 						style={styles.radioOption}
-						onPress={() => onTypeChange('esim')}
+						onPress={() => onTypeChange('ESIM')}
 					>
 						<View style={[
 							styles.radioCircle,
-							selectedType === 'esim' && styles.radioCircleSelected
+							selectedType === 'ESIM' && styles.radioCircleSelected
 						]}>
-							{selectedType === 'esim' && (
+							{selectedType === 'ESIM' && (
 								<View style={styles.radioInner} />
 							)}
 						</View>
 						<Text style={styles.radioLabel}>eSIM</Text>
 					</TouchableOpacity>
 				</View>
-				
+
 				<View style={styles.priceContainer}>
-					<Text style={styles.price}>{price}</Text>
+					<View style={{ flexDirection: 'column' }}
+					>
+						<Text style={styles.price}>{toCurrency(price)}</Text>
+						{basePrice || basePrice > price ? <Text style={styles.basePrice}>{toCurrency(basePrice)}</Text> : null}
+					</View>
 					<Icon
 						name="information-circle-outline"
 						type="ionicon"
@@ -60,10 +69,16 @@ export const SimTypeSection: React.FC<SimTypeSectionProps> = ({
 					/>
 				</View>
 			</View>
-			
-			<Text style={styles.shippingNote}>
-				*Giao SIM tại nhà - Có tính phí vận chuyển
-			</Text>
+
+			{selectedType === 'USIM' ? (
+				<Text style={styles.shippingNote}>
+					*Giao SIM vật lý tận nhà - Miễn phí vận chuyển
+				</Text>
+			) : (
+				<Text style={styles.shippingNote}>
+					Lưu ý: eSIM là SIM điện tử, được gửi qua email khách hàng. eSIM chỉ sử dụng được trên các thiết bị di động có hỗ trợ.
+					Xem danh sách thiết bị
+				</Text>)}
 		</View>
 	);
 };
@@ -124,8 +139,14 @@ const styles = StyleSheet.create({
 		fontFamily: 'Inter',
 		fontSize: 18,
 		fontWeight: '600',
-		lineHeight: 26,
+
 		color: '#333333',
+	},
+	basePrice: {
+		fontFamily: 'Inter',
+		fontSize: 16,
+		textDecorationLine: 'line-through',
+		color: '#A1A1A1',
 	},
 	shippingNote: {
 		fontFamily: 'Inter',

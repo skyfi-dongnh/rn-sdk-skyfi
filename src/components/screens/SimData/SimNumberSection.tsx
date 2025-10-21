@@ -1,29 +1,27 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { IconData } from '../../Svgs';
 
 interface SimNumberSectionProps {
 	phoneNumber: string;
 	onChangeNumber?: () => void;
 }
 
-export const SimNumberSection: React.FC<SimNumberSectionProps> = ({ 
-	phoneNumber, 
-	onChangeNumber 
+export const SimNumberSection: React.FC<SimNumberSectionProps> = ({
+	phoneNumber,
+	onChangeNumber
 }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.iconContainer}>
-				<View style={styles.simIcon}>
-					{/* SIM Icon SVG */}
-					<Text style={styles.simIconText}>SIM</Text>
-				</View>
+				<IconData />
 			</View>
-			
+
 			<View style={styles.contentContainer}>
 				<Text style={styles.label}>Số dành cho bạn</Text>
 				<Text style={styles.phoneNumber}>{phoneNumber}</Text>
 			</View>
-			
+
 			<TouchableOpacity style={styles.changeButton} onPress={onChangeNumber}>
 				<Text style={styles.changeButtonText}>Chọn số khác</Text>
 			</TouchableOpacity>

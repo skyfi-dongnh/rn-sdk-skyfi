@@ -1,73 +1,83 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PackageData, PackageItem } from '../../components/common/PackageItem';
-import { SimDataHeader, SimNumberSection, SimType, SimTypeSection, StepsIndicator, SummarySection } from '../../components/screens/SimData';
+import { PackageItem } from '../../components/common/PackageItem';
+import { showMessage } from '../../components/modals/ModalComfirm';
+import { SimDataHeader, SimNumberSection, SimTypeSection, StepsIndicator, SummarySection } from '../../components/screens/SimData';
+import { useLoading } from '../../hooks';
+import SimDataApi from '../../services/api/simdata.api';
+import SimData from '../../types/simdata.d';
+import { formatPhoneNumber, toCurrency } from '../../utils/format';
+import { basePriceSim, priceSim } from '../../utils/price';
 
 const SimDataScreen: React.FC = () => {
 	const navigation = useNavigation();
-	const [selectedSimType, setSelectedSimType] = useState<SimType>('physical');
+	const [selectedSimType, setSelectedSimType] = useState<SimData.SimType>('USIM');
 	const [selectedPackageId, setSelectedPackageId] = useState<string>('1');
 	const [currentStep] = useState<number>(1);
+	const [simData, setSimData] = useState<SimData.SimCard | null>(null);
+	const [listPackages, setListPackages] = useState<SimData.Package[]>([]);
+	const { load, close } = useLoading();
 
-	// Mock data packages based on Figma design
-	const dataPackages: PackageData[] = [
-		{
-			id: '1',
-			name: 'QUÀ TẶNG VIKKI',
-			data: 'Data: 2GB/ngày',
-			minutes: 'Miễn phí: SMS banking Vikky',
-			currentPrice: '69.000 VND',
-			duration: '/ 30 ngày',
-			isViki: true,
-			isSelect: selectedPackageId === '1',
-            isView:true,
-			vikiPoints: {
-				accumulated: '150đ',
-				required: '150đ',
-			},
-			onViewDetails: () => {
-				console.log('View details for package 1');
-			},
-			onRegister: () => {
-				setSelectedPackageId('1');
-			},
-		},
-		{
-			id: '2',
-			name: 'DATA NAME',
-			data: 'Data: 2GB/ngày',
-			minutes: 'Phút gọi: 800 phút gọi liên mạng',
-			currentPrice: '69.000 VND',
-			duration: '/ 30 ngày',
-			isViki: false,
-			isSelect: selectedPackageId === '2',
-            isView:true,
-			onViewDetails: () => {
-				console.log('View details for package 2');
-			},
-			onRegister: () => {
-				setSelectedPackageId('2');
-			},
-		},
-		{
-			id: '3',
-			name: 'DATA NAME',
-			data: 'Data: 2GB/ngày',
-			minutes: 'Phút gọi: 800 phút gọi liên mạng',
-			currentPrice: '69.000 VND',
-			duration: '/ 30 ngày',
-			isViki: false,
-			isSelect: selectedPackageId === '3',
-			onViewDetails: () => {
-				console.log('View details for package 3');
-			},
-			onRegister: () => {
-				setSelectedPackageId('3');
-			},
-		},
-	];
+
+
+
+	const getRandomSim = async () => {
+		try {
+			load();
+			const response = await SimDataApi.randomSim();
+			if (response.code != 200 || !response.result || response.result.length === 0) {
+				throw new Error('Lấy số SIM thất bại');
+			}
+			setSimData(response.result[0]);
+		}
+		catch (error) {
+			showMessage({
+				title: 'Thông báo',
+				description: error.message || 'Lấy số SIM thất bại, vui lòng thử lại sau!',
+				confirmLabel: 'Đóng'
+			})
+		}
+		finally {
+			close();
+		}
+	};
+
+	const getPackagesByMsisdnId = async (msisdn_id: number) => {
+		try {
+			load();
+			const response = await SimDataApi.getPackagesByMsisdnId(msisdn_id);
+			if (response.code != 200 || !response.result) {
+				throw new Error('Lấy gói cước thất bại');
+			}
+
+			setListPackages(response.result);
+
+		}
+		catch (error) {
+			showMessage({
+				title: 'Thông báo',
+				description: error.message || 'Lấy gói cước thất bại, vui lòng thử lại sau!',
+				confirmLabel: 'Đóng'
+			})
+			setListPackages([]);
+		}
+		finally {
+			close();
+		}
+	}
+	useEffect(() => {
+		getRandomSim();
+	}, []);
+
+	useEffect(() => {
+		if (simData) {
+			getPackagesByMsisdnId(simData.msisdn_id);
+		}
+	}, [simData]);
+
+
 
 	const handleBack = () => {
 		navigation.goBack();
@@ -93,22 +103,31 @@ const SimDataScreen: React.FC = () => {
 		// Navigate to checkout screen
 	};
 
+	const totalAmount = useMemo(() => {
+		if (!simData) return 0;
+
+		const basePrice = priceSim(simData, selectedSimType);
+		const packagePrice = listPackages.find(pkg => pkg.id.toString() === selectedPackageId)?.sale_price || 0;
+
+		return basePrice + packagePrice;
+	}, [simData, selectedSimType, selectedPackageId]);
+
 	return (
 		<SafeAreaView style={styles.container} edges={['top', 'bottom']}>
 			{/* Header */}
-			<SimDataHeader 
+			<SimDataHeader
 				title="Mua SIM mới"
 				onBack={handleBack}
 				onCart={handleCart}
 			/>
 
 			{/* Steps Indicator */}
-			<StepsIndicator 
+			<StepsIndicator
 				currentStep={currentStep}
 				steps={['Chọn số', 'Kích hoạt', 'Miễn phí cước']}
 			/>
 
-			<ScrollView 
+			<ScrollView
 				style={styles.scrollView}
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={false}
@@ -118,24 +137,32 @@ const SimDataScreen: React.FC = () => {
 					<View style={styles.simSection}>
 						{/* Phone Number Section */}
 						<SimNumberSection
-							phoneNumber="0707 123 456"
+							phoneNumber={simData ? formatPhoneNumber(simData.msisdn) : 'Đang tải...'}
 							onChangeNumber={handleChangeNumber}
 						/>
 
 						{/* SIM Type Section */}
-						<SimTypeSection
+						{simData && <SimTypeSection
 							selectedType={selectedSimType}
 							onTypeChange={setSelectedSimType}
-							price="0 VND"
+							price={priceSim(simData, selectedSimType)}
+							basePrice={basePriceSim(simData, selectedSimType)}
 						/>
+						}
 					</View>
 
 					{/* Data Packages Section */}
 					<View style={styles.packagesSection}>
-						{dataPackages.map((pkg) => (
-							<PackageItem 
-								key={pkg.id} 
+						{listPackages.map((pkg) => (
+							<PackageItem
+								key={pkg.id}
 								package={pkg}
+								isSelect={selectedPackageId == pkg.id.toString()}
+								onViewDetails={() => {}}
+								isView={false}
+
+								onRegister={() => setSelectedPackageId(pkg.id.toString())}
+
 							/>
 						))}
 					</View>
@@ -144,7 +171,7 @@ const SimDataScreen: React.FC = () => {
 
 			{/* Summary Section */}
 			<SummarySection
-				totalAmount="148,000 VND"
+				totalAmount={toCurrency(totalAmount)}
 				onAddToCart={handleAddToCart}
 				onCheckout={handleCheckout}
 			/>
@@ -173,7 +200,7 @@ const styles = StyleSheet.create({
 		gap: 16,
 		backgroundColor: '#FFFFFF',
 		borderRadius: 16,
-		padding: 16,
+
 	},
 	packagesSection: {
 		gap: 16,

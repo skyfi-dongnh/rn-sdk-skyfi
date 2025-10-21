@@ -1,5 +1,9 @@
 export { AlertIcon } from './AlertIcon';
 export { BackIcon } from './BackIcon';
+export { IconCall } from './IconCall';
+export { IconData } from './IconData';
+export { IconMail } from './IconMail';
+export { IconSpeed } from './IconSpeed';
 export { MoneyIcon } from './MoneyIcon';
 export { PackageIcon } from './PackageIcon';
 export { SimCardIcon } from './SimCardIcon';
