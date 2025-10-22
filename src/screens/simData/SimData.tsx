@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PackageItem } from '../../components/common/PackageItem';
+import { showListPhoneModal } from '../../components/modals';
 import { showMessage } from '../../components/modals/ModalComfirm';
 import { SimDataHeader, SimNumberSection, SimTypeSection, StepsIndicator, SummarySection } from '../../components/screens/SimData';
 import { useLoading } from '../../hooks';
@@ -89,8 +90,7 @@ const SimDataScreen: React.FC = () => {
 	};
 
 	const handleChangeNumber = () => {
-		console.log('Change phone number');
-		// Navigate to phone number selection screen
+		showListPhoneModal();
 	};
 
 	const handleAddToCart = () => {

@@ -2,6 +2,7 @@ import { makeStyles } from '@rneui/themed';
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import InputNumber from '../../components/forms/inputNumber';
 import { useI18n } from '../../hooks';
 
 const useStyles = makeStyles((theme) => ({
@@ -44,6 +45,7 @@ const NotificationScreen: React.FC = () => {
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>{t('notification.empty')}</Text>
         </View>
+        <InputNumber number={6} onChange={(value) => console.log(value)} onComplete={(value) => console.log('onComplete',value)} />
       </ScrollView>
     </SafeAreaView>
   );

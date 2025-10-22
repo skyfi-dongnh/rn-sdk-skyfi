@@ -4,7 +4,7 @@ namespace SimData {
 	interface SimDataAPI {
 		randomSim: () => Promise<Response<SimCard[]>>;
 		getPackagesByMsisdnId: (msisdn_id: number) => Promise<Response<Package[]>>;
-		getListSim: (param: ParamListSim) => Promise<SimCard[]>;
+		getListSim: (param: ParamListSim) => Promise<Response<SimCard[]>>;
 	}
 
 	interface Response<T> {
