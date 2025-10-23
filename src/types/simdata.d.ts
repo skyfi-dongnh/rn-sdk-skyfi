@@ -3,7 +3,7 @@
 namespace SimData {
 	interface SimDataAPI {
 		randomSim: () => Promise<Response<SimCard[]>>;
-		getPackagesByMsisdnId: (msisdn_id: number) => Promise<Response<Package[]>>;
+		getPackagesByMsisdnId: (msisdn_id: string) => Promise<Response<Package[]>>;
 		getListSim: (param: ParamListSim) => Promise<Response<SimCard[]>>;
 	}
 
@@ -75,4 +75,3 @@ namespace SimData {
 		'ESIM';
 }
 
-export default SimData;

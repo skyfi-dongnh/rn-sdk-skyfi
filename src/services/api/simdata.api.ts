@@ -1,4 +1,4 @@
-import SimData from '../../types/simdata';
+
 import axiosInstance from './axios.config';
 
 const SimDataApi: SimData.SimDataAPI = {

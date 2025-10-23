@@ -8,18 +8,19 @@ import { showMessage } from '../../components/modals/ModalComfirm';
 import { SimDataHeader, SimNumberSection, SimTypeSection, StepsIndicator, SummarySection } from '../../components/screens/SimData';
 import { useLoading } from '../../hooks';
 import SimDataApi from '../../services/api/simdata.api';
-import SimData from '../../types/simdata.d';
+import { useSimCheckoutStore } from '../../store';
 import { formatPhoneNumber, toCurrency } from '../../utils/format';
 import { basePriceSim, priceSim } from '../../utils/price';
 
 const SimDataScreen: React.FC = () => {
 	const navigation = useNavigation();
 	const [selectedSimType, setSelectedSimType] = useState<SimData.SimType>('USIM');
-	const [selectedPackageId, setSelectedPackageId] = useState<string>('1');
+	const [selectedPackage, setSelectedPackage] = useState<SimData.Package | null>(null);
 	const [currentStep] = useState<number>(1);
 	const [simData, setSimData] = useState<SimData.SimCard | null>(null);
 	const [listPackages, setListPackages] = useState<SimData.Package[]>([]);
 	const { load, close } = useLoading();
+	const { setData } = useSimCheckoutStore();
 
 
 
@@ -45,7 +46,7 @@ const SimDataScreen: React.FC = () => {
 		}
 	};
 
-	const getPackagesByMsisdnId = async (msisdn_id: number) => {
+	const getPackagesByMsisdnId = async (msisdn_id: string) => {
 		try {
 			load();
 			const response = await SimDataApi.getPackagesByMsisdnId(msisdn_id);
@@ -74,7 +75,7 @@ const SimDataScreen: React.FC = () => {
 
 	useEffect(() => {
 		if (simData) {
-			getPackagesByMsisdnId(simData.msisdn_id);
+			getPackagesByMsisdnId(simData.msisdn);
 		}
 	}, [simData]);
 
@@ -89,8 +90,11 @@ const SimDataScreen: React.FC = () => {
 		// Navigate to cart screen
 	};
 
-	const handleChangeNumber = () => {
-		showListPhoneModal();
+	const handleChangeNumber = async () => {
+		const newNumber = await showListPhoneModal();
+		if (newNumber) {
+			setSimData(newNumber);
+		}
 	};
 
 	const handleAddToCart = () => {
@@ -98,19 +102,19 @@ const SimDataScreen: React.FC = () => {
 		// Add selected package to cart
 	};
 
-	const handleCheckout = () => {
-		console.log('Checkout');
-		// Navigate to checkout screen
+	const handleCheckout = async () => {
+
+		
 	};
 
 	const totalAmount = useMemo(() => {
 		if (!simData) return 0;
 
 		const basePrice = priceSim(simData, selectedSimType);
-		const packagePrice = listPackages.find(pkg => pkg.id.toString() === selectedPackageId)?.sale_price || 0;
+		const packagePrice = listPackages.find(pkg => pkg.id === selectedPackage?.id)?.sale_price || 0;
 
 		return basePrice + packagePrice;
-	}, [simData, selectedSimType, selectedPackageId]);
+	}, [simData, selectedSimType, selectedPackage]);
 
 	return (
 		<SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -157,11 +161,11 @@ const SimDataScreen: React.FC = () => {
 							<PackageItem
 								key={pkg.id}
 								package={pkg}
-								isSelect={selectedPackageId == pkg.id.toString()}
-								onViewDetails={() => {}}
+								isSelect={selectedPackage?.id === pkg.id}
+								onViewDetails={() => { }}
 								isView={false}
 
-								onRegister={() => setSelectedPackageId(pkg.id.toString())}
+								onRegister={() => setSelectedPackage(pkg)}
 
 							/>
 						))}

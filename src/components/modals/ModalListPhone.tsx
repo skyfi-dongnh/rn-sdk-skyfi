@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SimDataApi from '../../services/api/simdata.api';
 import Modal from '../../types/modal';
-import SimData from '../../types/simdata';
+import { formatPhoneNumber, toCurrency } from '../../utils/format';
 import { CustomButton, modal, useModal } from '../common';
 import InputNumber from '../forms/inputNumber';
 import { IconSearch, SearchIllustration } from '../Svgs';
@@ -12,9 +12,9 @@ type ModalListPhoneProps = {
 	onSelectPhone?: (phone: SimData.SimCard) => void;
 };
 
-const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) => {
+const ModalListPhoneContent = ({ defaultPrefix = '070' }: ModalListPhoneProps) => {
 	const { close, done } = useModal();
-	const [searchValue, setSearchValue] = useState<string>('***');
+	const [searchValue, setSearchValue] = useState<string>('');
 	const [simList, setSimList] = useState<SimData.SimCard[]>([]);
 	const [suggestedSims, setSuggestedSims] = useState<SimData.SimCard[]>([]);
 	const [selectedSim, setSelectedSim] = useState<SimData.SimCard | null>(null);
@@ -22,7 +22,7 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 	const [showEmptyState, setShowEmptyState] = useState<boolean>(false);
 	const [error, setError] = useState<string>('');
 
-	
+
 
 	// Initial load of suggested SIMs
 	useEffect(() => {
@@ -30,20 +30,20 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 	}, []);
 
 	// Fetch SIM list based on search
-	const fetchSimList = async (search: string='') => {
+	const fetchSimList = async (search: string = '') => {
 		try {
 			setLoading(true);
 			setError('');
 			setShowEmptyState(false);
-			
+
 			const res = await SimDataApi.getListSim({
 				filters: {
-					search:  search,
+					search: search ? `070${search}` : ``,
 				},
 				page: 1,
 				pageSize: 20,
 			});
-			
+
 			if (res && res.result.length > 0) {
 				setSimList(res.result);
 				setShowEmptyState(false);
@@ -65,13 +65,7 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 		setSearchValue(value);
 	};
 
-	// Handle search completion (when user fills all input fields)
-	const handleSearchComplete = (value: string) => {
-		setSearchValue(value);
-		fetchSimList(value);
-	};
 
-	// Handle SIM selection
 	const handleSelectSim = (sim: SimData.SimCard) => {
 		setSelectedSim(sim);
 	};
@@ -83,21 +77,6 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 		}
 	};
 
-	// Format price
-	const formatPrice = (price: number) => {
-		return new Intl.NumberFormat('vi-VN', {
-			style: 'currency',
-			currency: 'VND',
-		}).format(price).replace('₫', 'VND');
-	};
-
-	// Format phone number with spaces
-	const formatPhoneNumber = (phone: string) => {
-		if (phone.length === 10) {
-			return `${phone.slice(0, 4)} ${phone.slice(4, 7)} ${phone.slice(7)}`;
-		}
-		return phone;
-	};
 
 	return (
 		<View style={styles.container}>
@@ -115,13 +94,13 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 				<View style={styles.searchRow}>
 					<Text style={styles.prefixText}>{defaultPrefix}</Text>
 					<InputNumber
-						number={6}
+						number={7}
 						onChange={handleSearchChange}
-						onComplete={handleSearchComplete}
+						// onComplete={handleSearchComplete}
 						width={32}
-						format="*"
+						format="x"
 					/>
-					<TouchableOpacity 
+					<TouchableOpacity
 						style={styles.searchButton}
 						onPress={() => fetchSimList(searchValue)}
 					>
@@ -131,7 +110,7 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 			</View>
 
 			{/* SIM List */}
-			<ScrollView 
+			<ScrollView
 				style={styles.simListContainer}
 				contentContainerStyle={styles.simListContent}
 				showsVerticalScrollIndicator={true}
@@ -165,27 +144,27 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 									<Text style={styles.phoneNumber}>
 										{formatPhoneNumber(sim.msisdn)}
 									</Text>
-									
+
 									<View style={styles.divider} />
-									
+
 									<View style={styles.priceContainer}>
 										{sim.sale_price < sim.base_price ? (
 											<>
 												<Text style={styles.originalPrice}>
-													{formatPrice(sim.base_price)}
+													{toCurrency(sim.base_price)}
 												</Text>
 												<Text style={styles.salePrice}>
-													{formatPrice(sim.sale_price)}
+													{toCurrency(sim.sale_price)}
 												</Text>
 											</>
 										) : (
 											<Text style={styles.price}>
-												{formatPrice(sim.base_price)}
+												{toCurrency(sim.base_price)}
 											</Text>
 										)}
 									</View>
 								</View>
-								
+
 								{/* Radio Button */}
 								<View style={styles.radioButton}>
 									<View
@@ -220,27 +199,27 @@ const ModalListPhoneContent = ({ defaultPrefix = '0772' }: ModalListPhoneProps) 
 								<Text style={styles.phoneNumber}>
 									{formatPhoneNumber(sim.msisdn)}
 								</Text>
-								
+
 								<View style={styles.divider} />
-								
+
 								<View style={styles.priceContainer}>
 									{sim.sale_price < sim.base_price ? (
 										<>
 											<Text style={styles.originalPrice}>
-												{formatPrice(sim.base_price)}
+												{toCurrency(sim.base_price)}
 											</Text>
 											<Text style={styles.salePrice}>
-												{formatPrice(sim.sale_price)}
+												{toCurrency(sim.sale_price)}
 											</Text>
 										</>
 									) : (
 										<Text style={styles.price}>
-											{formatPrice(sim.base_price)}
+											{toCurrency(sim.base_price)}
 										</Text>
 									)}
 								</View>
 							</View>
-							
+
 							{/* Radio Button */}
 							<View style={styles.radioButton}>
 								<View
