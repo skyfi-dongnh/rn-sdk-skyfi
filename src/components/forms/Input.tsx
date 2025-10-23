@@ -1,12 +1,12 @@
 import React from 'react';
-import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path, RegisterOptions } from 'react-hook-form';
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TextInputProps,
-    View,
-    ViewStyle,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+  ViewStyle,
 } from 'react-native';
 
 interface InputProps<T extends FieldValues> extends Omit<TextInputProps, 'value' | 'onChangeText'> {
@@ -17,6 +17,7 @@ interface InputProps<T extends FieldValues> extends Omit<TextInputProps, 'value'
   helperText?: string;
   error?: string;
   containerStyle?: ViewStyle;
+  rules?: RegisterOptions<T>;
 }
 
 const Input = <T extends FieldValues>({
@@ -28,13 +29,15 @@ const Input = <T extends FieldValues>({
   error,
   containerStyle,
   placeholder,
+  rules,
   ...textInputProps
 }: InputProps<T>) => {
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange, onBlur, value } }) => (
+      rules={rules}
+      render={({ field: { onChange, onBlur, value }, fieldState: { error: fieldError } }) => (
         <View style={[styles.container, containerStyle]}>
           {label && (
             <View style={styles.labelContainer}>
@@ -42,8 +45,8 @@ const Input = <T extends FieldValues>({
               {required && <Text style={styles.required}>*</Text>}
             </View>
           )}
-          
-          <View style={[styles.inputWrapper, error && styles.inputWrapperError]}>
+
+          <View style={[styles.inputWrapper, (error || fieldError) && styles.inputWrapperError]}>
             <TextInput
               style={styles.input}
               value={value}
@@ -55,8 +58,8 @@ const Input = <T extends FieldValues>({
             />
           </View>
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          {!error && helperText && <Text style={styles.helperText}>{helperText}</Text>}
+          {(error || fieldError) && <Text style={styles.errorText}>{error || fieldError?.message}</Text>}
+          {!(error || fieldError) && helperText && <Text style={styles.helperText}>{helperText}</Text>}
         </View>
       )}
     />

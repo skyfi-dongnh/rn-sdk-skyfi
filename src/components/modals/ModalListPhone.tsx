@@ -248,7 +248,6 @@ const ModalListPhoneContent = ({ defaultPrefix = '070' }: ModalListPhoneProps) =
 					size="medium"
 					width="100%"
 				/>
-				<View style={styles.homeIndicator} />
 			</View>
 		</View>
 	);

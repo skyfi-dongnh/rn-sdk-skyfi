@@ -9,11 +9,12 @@ import { SimDataHeader, SimNumberSection, SimTypeSection, StepsIndicator, Summar
 import { useLoading } from '../../hooks';
 import SimDataApi from '../../services/api/simdata.api';
 import { useSimCheckoutStore } from '../../store';
-import { formatPhoneNumber, toCurrency } from '../../utils/format';
+import { convertSimDataToCheckoutItem, formatPhoneNumber, toCurrency } from '../../utils/format';
 import { basePriceSim, priceSim } from '../../utils/price';
+import { NavigationProp } from '../Home/HomeScreen';
 
 const SimDataScreen: React.FC = () => {
-	const navigation = useNavigation();
+	const navigation = useNavigation<NavigationProp>();
 	const [selectedSimType, setSelectedSimType] = useState<SimData.SimType>('USIM');
 	const [selectedPackage, setSelectedPackage] = useState<SimData.Package | null>(null);
 	const [currentStep] = useState<number>(1);
@@ -55,7 +56,10 @@ const SimDataScreen: React.FC = () => {
 			}
 
 			setListPackages(response.result);
-
+			const packageDefault = response.result.find(pkg => pkg.is_default === 1);
+			if (packageDefault) {
+				setSelectedPackage(packageDefault);
+			}
 		}
 		catch (error) {
 			showMessage({
@@ -103,8 +107,9 @@ const SimDataScreen: React.FC = () => {
 	};
 
 	const handleCheckout = async () => {
-
-		
+		const datacheckout: Checkout.ProductCheckout = convertSimDataToCheckoutItem(simData, selectedPackage,selectedSimType);
+		setData([datacheckout]);
+		navigation.navigate('Checkout');
 	};
 
 	const totalAmount = useMemo(() => {
@@ -162,7 +167,7 @@ const SimDataScreen: React.FC = () => {
 								key={pkg.id}
 								package={pkg}
 								isSelect={selectedPackage?.id === pkg.id}
-								onViewDetails={() => { }}
+								onViewDetails={() => {}}
 								isView={false}
 
 								onRegister={() => setSelectedPackage(pkg)}

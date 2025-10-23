@@ -1,7 +1,6 @@
 import { Icon } from '@rneui/themed';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SimData from '../../../types/simdata.d';
 import { toCurrency } from '../../../utils/format';
 
 

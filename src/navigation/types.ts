@@ -1,3 +1,5 @@
+import { StackNavigationProp } from "@react-navigation/stack";
+
 export type RootStackParamList = {
     MainTabs: undefined;
     Home: undefined;
@@ -14,6 +16,7 @@ export type RootStackParamList = {
     ResultVideoCall: { status: 'success' | 'error' };
     SimData: undefined;
     Checkout: undefined;
+
 };
 
 export type BottomTabParamList = {
@@ -22,3 +25,5 @@ export type BottomTabParamList = {
     SupportTab: undefined;
     ProfileTab: undefined;
 };
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;

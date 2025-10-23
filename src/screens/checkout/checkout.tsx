@@ -2,138 +2,128 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CheckBox, Icon, makeStyles } from '@rneui/themed';
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import {
-    Alert,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '../../components/common/CustomButton';
+import Input from '../../components/forms/Input';
+import { SelectedAddress, showAddressSelectModal } from '../../components/modals/AddressSelectModal';
 import { RootStackParamList } from '../../navigation';
+import { useSimCheckoutStore } from '../../store';
 
 type CheckoutNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
-
-interface Product {
-  id: string;
-  name: string;
-  type: 'SIM_MVNO' | 'COUNTRY' | 'REGION';
-  description: string;
-  price: number;
-  originalPrice?: number;
-  image?: string;
-  flag?: string;
-  quantity?: number;
-}
 
 const CheckoutScreen: React.FC = () => {
   const navigation = useNavigation<CheckoutNavigationProp>();
   const styles = useStyles();
+  const { data: checkoutProducts } = useSimCheckoutStore();
 
-  // Form states
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [name, setName] = useState('');
-  const [province, setProvince] = useState('');
-  const [detailedAddress, setDetailedAddress] = useState('');
+  // Form with react-hook-form
+  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<Checkout.CheckoutInfo>({
+    defaultValues: {
+      email: '',
+      contact_phone: '',
+      customer_name: '',
+      delivery_address: '',
+      city_id: undefined,
+      district_id: undefined,
+      ward_id: undefined,
+    },
+    mode: 'onChange',
+  });
+
+  // Additional states
+  const [selectedAddress, setSelectedAddress] = useState<SelectedAddress>();
   const [promoCode, setPromoCode] = useState('');
-  
+
   // Checkbox states
   const [agreeBank, setAgreeBank] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  // Sample products data
-  const products: Product[] = [
-    {
-      id: '1',
-      name: '0707 123 456',
-      type: 'SIM_MVNO',
-      description: 'SIM vật lý\nGói SF79',
-      price: 148000,
-      quantity: 1,
-    },
-    {
-      id: '2',
-      name: 'Singapore',
-      type: 'COUNTRY',
-      description: 'Số lượng: 1',
-      price: 299000,
-      flag: '🇸🇬',
-      quantity: 1,
-    },
-    {
-      id: '3',
-      name: 'Thailand',
-      type: 'COUNTRY',
-      description: 'Số lượng: 1',
-      price: 398000,
-      originalPrice: 100000,
-      flag: '🇹🇭',
-      quantity: 1,
-    },
-    {
-      id: '4',
-      name: 'BẮC MỸ',
-      type: 'REGION',
-      description: 'Số lượng: 1',
-      price: 299000,
-      quantity: 1,
-    },
-    {
-      id: '5',
-      name: 'TOÀN CẦU',
-      type: 'REGION',
-      description: 'Số lượng: 1',
-      price: 299000,
-      quantity: 1,
-    },
-  ];
-
-  const subtotal = products.reduce((sum, product) => sum + product.price, 0);
+  const subtotal = checkoutProducts.reduce((sum, product) => sum + (product.total_price || 0), 0);
   const total = subtotal;
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')} VND`;
   };
 
-  const handleCheckout = () => {
-    // Validate form
-    if (!email || !phone || !province || !agreeBank || !agreeTerms) {
-      Alert.alert('Thông báo', 'Vui lòng điền đầy đủ thông tin và đồng ý với các điều khoản');
+  const handleCheckout = handleSubmit((data) => {
+    // Validate checkboxes
+    if (!agreeBank || !agreeTerms) {
+      Alert.alert('Thông báo', 'Vui lòng đồng ý với các điều khoản');
       return;
     }
-    // Process checkout
-    console.log('Processing checkout...');
+
+    // Validate required fields
+    if (!data.email || !data.contact_phone || !selectedAddress) {
+      Alert.alert('Thông báo', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+      return;
+    }
+
+    // Process checkout with form data
+    const checkoutData: Checkout.CheckoutInfo = {
+      ...data,
+      city_id: selectedAddress?.cityId,
+      district_id: selectedAddress?.districtId,
+      ward_id: selectedAddress?.wardId,
+      total_amount: total,
+      items: checkoutProducts,
+    };
+
+    console.log('Processing checkout...', checkoutData);
+  });
+
+  const handleAddressSelect = async () => {
+    try {
+      const address = await showAddressSelectModal({
+        onSelect: (address) => {
+          setSelectedAddress(address);
+          setValue('city_id', address.cityId);
+          setValue('district_id', address.districtId);
+          setValue('ward_id', address.wardId);
+        },
+        initialAddress: selectedAddress,
+      });
+    } catch (error) {
+      console.log('Address selection cancelled');
+    }
   };
 
-  const renderProductItem = (product: Product) => (
-    <View key={product.id} style={styles.productItem}>
+  const renderProductItem = (product: Checkout.ProductCheckout, index: number) => (
+    <View key={`${product.product_id}-${index}`} style={styles.productItem}>
       <View style={styles.productImageContainer}>
-        {product.type === 'SIM_MVNO' ? (
+        {product.sim_type ? (
           <View style={styles.simLogo} />
-        ) : product.flag ? (
-          <Text style={styles.flagEmoji}>{product.flag}</Text>
         ) : (
           <View style={styles.regionLogo} />
         )}
       </View>
-      
+
       <View style={styles.productInfo}>
-        <Text style={styles.productName}>{product.name}</Text>
-        <Text style={styles.productDescription}>{product.description}</Text>
+        <Text style={styles.productName}>{product.product_name || 'Sản phẩm'}</Text>
+        <Text style={styles.productDescription}>
+          {product.sim_type && `SIM ${product.sim_type}`}
+          {product.pack_code && `\nGói ${product.pack_code}`}
+          {product.quantity && `\nSố lượng: ${product.quantity}`}
+        </Text>
       </View>
-      
+
       <View style={styles.productPriceContainer}>
-        {product.originalPrice ? (
+        {product.base_price && product.base_price !== product.total_price ? (
           <View style={styles.salePriceContainer}>
-            <Text style={styles.productPrice}>{formatCurrency(product.price)}</Text>
-            <Text style={styles.originalPrice}>{formatCurrency(product.originalPrice)}</Text>
+            <Text style={styles.productPrice}>{formatCurrency(product.total_price || 0)}</Text>
+            <Text style={styles.originalPrice}>{formatCurrency(product.base_price)}</Text>
           </View>
         ) : (
-          <Text style={styles.productPrice}>{formatCurrency(product.price)}</Text>
+          <Text style={styles.productPrice}>{formatCurrency(product.total_price || 0)}</Text>
         )}
       </View>
     </View>
@@ -158,7 +148,7 @@ const CheckoutScreen: React.FC = () => {
           <View style={styles.placeholder} />
         </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -169,94 +159,93 @@ const CheckoutScreen: React.FC = () => {
             <Text style={styles.sectionDescription}>
               Chúng tôi sẽ liên hệ và gửi thông tin đến bạn qua thông tin liên hệ dưới đây.
             </Text>
-            
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Email<Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập email"
-                placeholderTextColor="#A1A1A1"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
 
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Số điện thoại<Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập số điện thoại"
-                placeholderTextColor="#A1A1A1"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-              />
-            </View>
+            <Input
+              name="email"
+              control={control}
+              label="Email"
+              required
+              placeholder="Nhập email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              containerStyle={styles.formGroup}
+              rules={{
+                required: 'Email là bắt buộc',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Email không hợp lệ'
+                }
+              }}
+            />
 
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Tên</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập tên"
-                placeholderTextColor="#A1A1A1"
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
+            <Input
+              name="contact_phone"
+              control={control}
+              label="Số điện thoại"
+              required
+              placeholder="Nhập số điện thoại"
+              keyboardType="phone-pad"
+              containerStyle={styles.formGroup}
+              rules={{
+                required: 'Số điện thoại là bắt buộc',
+                pattern: {
+                  value: /^[0-9]{10,11}$/,
+                  message: 'Số điện thoại không hợp lệ'
+                }
+              }}
+            />
+
+            <Input
+              name="customer_name"
+              control={control}
+              label="Tên"
+              placeholder="Nhập tên"
+              containerStyle={styles.formGroup}
+            />
           </View>
 
           {/* Shipping Address */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Địa chỉ nhận SIM</Text>
-            
+
             <View style={styles.formGroup}>
               <Text style={styles.label}>
                 Tỉnh/Thành phố, Quận/ Huyện, Phường/Xã<Text style={styles.required}>*</Text>
               </Text>
-              <TouchableOpacity style={styles.inputWithIcon}>
-                <TextInput
-                  style={[styles.input, styles.inputNoBorder]}
-                  placeholder="Nhập Tỉnh/Thành phố"
-                  placeholderTextColor="#A1A1A1"
-                  value={province}
-                  onChangeText={setProvince}
-                />
+              <TouchableOpacity style={styles.inputWithIcon} onPress={handleAddressSelect}>
+                <Text style={[styles.input, styles.inputNoBorder, selectedAddress?.address ? styles.addressText : styles.addressPlaceholder]}>
+                  {selectedAddress?.address || 'Chọn địa chỉ'}
+                </Text>
                 <Icon name="chevron-down" type="ionicon" size={20} color="#333333" />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Địa chỉ chi tiết</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập địa chỉ chi tiết"
-                placeholderTextColor="#A1A1A1"
-                value={detailedAddress}
-                onChangeText={setDetailedAddress}
-              />
-            </View>
+            <Input
+              name="delivery_address"
+              control={control}
+              label="Địa chỉ chi tiết"
+              placeholder="Nhập địa chỉ chi tiết"
+              rules={{
+                required: 'Địa chỉ là bắt buộc',
+              }}
+              containerStyle={styles.formGroup}
+            />
           </View>
 
           {/* Order Summary */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Đơn hàng của bạn</Text>
-            
+
             <View style={styles.orderRow}>
-              <Text style={styles.orderLabel}>{products.length} sản phẩm</Text>
+              <Text style={styles.orderLabel}>{checkoutProducts.length} sản phẩm</Text>
               <Text style={styles.orderValue}>{formatCurrency(subtotal)}</Text>
             </View>
-            
+
             <View style={styles.orderRow}>
               <Text style={styles.orderLabel}>Thuế & Phí dịch vụ</Text>
               <Text style={styles.orderValue}>Đã bao gồm</Text>
             </View>
-            
+
             <View style={[styles.orderRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Tổng cộng</Text>
               <Text style={styles.totalValue}>{formatCurrency(total)}</Text>
@@ -277,7 +266,7 @@ const CheckoutScreen: React.FC = () => {
             {/* Products List */}
             <Text style={[styles.sectionTitle, styles.productSectionTitle]}>Sản phẩm</Text>
             <View style={styles.productsContainer}>
-              {products.map(renderProductItem)}
+              {checkoutProducts.map((product, index) => renderProductItem(product, index))}
             </View>
           </View>
         </ScrollView>
@@ -315,7 +304,7 @@ const CheckoutScreen: React.FC = () => {
             onPress={handleCheckout}
             type="primary"
             size="medium"
-            disabled={!agreeBank || !agreeTerms || !email || !phone || !province}
+            disabled={!agreeBank || !agreeTerms || !watch('email') || !watch('contact_phone') || !selectedAddress}
             width="100%"
           />
         </View>
@@ -411,6 +400,14 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: 0,
     flex: 1,
     paddingHorizontal: 0,
+  },
+  addressText: {
+    color: '#333333',
+    fontSize: 16,
+  },
+  addressPlaceholder: {
+    color: '#A1A1A1',
+    fontSize: 16,
   },
   orderRow: {
     flexDirection: 'row',

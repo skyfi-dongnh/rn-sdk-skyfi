@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { buttonGradientColors } from '../../theme/rneui.theme';
-import SimData from '../../types/simdata';
 import { toCurrency } from '../../utils/format';
 import { IconCall, IconMail, IconSpeed } from '../Svgs';
 import { CustomButton } from './CustomButton';
