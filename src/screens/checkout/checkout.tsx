@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { CheckBox, Icon, makeStyles } from '@rneui/themed';
-import React, { useState } from 'react';
+import { Icon, makeStyles } from '@rneui/themed';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   ScrollView,
@@ -13,10 +13,13 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '../../components/common/CustomButton';
+import { CustomCheckbox, TextSegment } from '../../components/common/CustomCheckbox';
 import Input from '../../components/forms/Input';
+import { ShippingAddress } from '../../components/forms/ShippingAddress';
 import { SelectedAddress, showAddressSelectModal } from '../../components/modals/AddressSelectModal';
 import { showMessage } from '../../components/modals/ModalComfirm';
 import { useI18n, useLoading } from '../../hooks';
+import useDebounce from '../../hooks/useDebounce';
 import { RootStackParamList } from '../../navigation';
 import CheckoutService from '../../services/api/checkout.api';
 import { useSimCheckoutStore } from '../../store';
@@ -48,32 +51,126 @@ const CheckoutScreen: React.FC = () => {
   // Additional states
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress>();
   const [promoCode, setPromoCode] = useState('');
+  const delivery_address = watch('delivery_address');
+  const shipping_amount = watch('shipping_amount');
 
   // Checkbox states
   const [agreeBank, setAgreeBank] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeESim, setAgreeESim] = useState(false);
+
+  // Text segments for checkboxes with clickable links
+  const bankTextSegments: TextSegment[] = [
+    { text: 'Tôi đồng ý thuê bao này là thuê bao nhận SMS banking từ ' },
+    {
+      text: 'Vikki Bank',
+      isLink: true,
+      onPress: () => {
+        // Custom function instead of URL - could open a modal, navigate, etc.
+        console.log('Vikki Bank clicked');
+        showMessage({
+          title: 'Vikki Bank',
+          description: 'Thông tin về Vikki Bank sẽ được hiển thị ở đây.',
+          confirmLabel: 'OK',
+        });
+      },
+      style: { fontWeight: '500' }
+    }
+  ];
+
+  const termsTextSegments: TextSegment[] = [
+    { text: 'Tôi đồng ý với ' },
+    {
+      text: 'Điều khoản & Điều kiện',
+      isLink: true,
+      url: 'https://skyfi.vn/terms-and-conditions',
+      style: { fontWeight: '500' }
+    },
+    { text: ' giao dịch chung của SkyFi và ' },
+    {
+      text: 'chính sách xử lý, bảo vệ dữ liệu cá nhân',
+      isLink: true,
+      url: 'https://skyfi.vn/privacy-policy',
+      style: { fontWeight: '500' }
+    }
+  ];
+
+  const eSimTextSegments: TextSegment[] = [
+    { text: 'Thiết bị của tôi là tương thích với eSIM' },
+
+  ];
+
+  const isFullEsim = useMemo(() => checkoutProducts?.every((item) => item.sim_type != 'USIM'), [checkoutProducts]);
+  const hasEsim = useMemo(() => checkoutProducts?.some((item) => item.sim_type != 'USIM'), [checkoutProducts]);
 
   const subtotal = checkoutProducts.reduce((sum, product) => sum + (product.total_price || 0), 0);
-  const total = subtotal;
+  const total = useMemo(() => {
+    return subtotal + (shipping_amount || 0);
+  }, [subtotal, shipping_amount]);
 
+  const deliveryAddress: Checkout.ParamDeliveryFee = useMemo(() => {
+    if (selectedAddress && delivery_address) {
+      return {
+        city_id: selectedAddress.cityId,
+        district_id: selectedAddress.districtId,
+        ward_id: selectedAddress.wardId,
+        delivery_address: delivery_address,
+      };
+    }
+  }, [selectedAddress, delivery_address]);
 
+  const ParamDeliveryFee = useDebounce<Checkout.ParamDeliveryFee | {}>(deliveryAddress);
+
+  const fetchDeliveryFee = async () => {
+    if (ParamDeliveryFee && Object.keys(ParamDeliveryFee).length > 0) {
+      try {
+        load();
+        const response = await CheckoutService.getDeliveryFee(ParamDeliveryFee as Checkout.ParamDeliveryFee);
+        if (response.code === 200 && response.result?.shipping_fee) {
+          setValue('shipping_amount', response.result.shipping_fee);
+
+        } else {
+          console.log('Failed to fetch delivery fee:', response.message);
+        }
+      } catch (error) {
+        console.error('Error fetching delivery fee:', error);
+      } finally { close(); }
+    }
+  };
+  useEffect(() => {
+    fetchDeliveryFee();
+  }, [ParamDeliveryFee]);
 
   const handleCheckout = async (data: Checkout.CheckoutInfo) => {
     // Validate checkboxes
-    if (!agreeBank || !agreeTerms) {
-       showMessage({
+    const requiredCheckboxes = !agreeBank || !agreeTerms || (hasEsim && !agreeESim);
+    if (requiredCheckboxes) {
+      showMessage({
         title: 'Thông báo',
-        description: 'Vui lòng đồng ý với các điều khoản',
+        description: hasEsim && !agreeESim
+          ? 'Vui lòng xác nhận thiết bị của bạn tương thích với eSIM'
+          : 'Vui lòng đồng ý với các điều khoản',
         confirmLabel: 'OK',
       });
       return;
     }
 
     // Validate required fields
-    if (!data.email || !data.contact_phone || !selectedAddress) {
-     showMessage({
+    const emailValid = data.email;
+    const phoneValid = hasEsim || data.contact_phone;
+    const addressValid = isFullEsim || selectedAddress;
+    const deliveryAddressValid = isFullEsim || data.delivery_address;
+
+    if (!emailValid || !phoneValid || !addressValid || !deliveryAddressValid) {
+      let missingFields = [];
+      if (!emailValid) missingFields.push('Email');
+      if (!phoneValid) missingFields.push('Số điện thoại');
+      if (!addressValid) missingFields.push('Địa chỉ nhận hàng');
+      if (!deliveryAddressValid) missingFields.push('Địa chỉ chi tiết');
+
+      showMessage({
         title: 'Thông báo',
-        description: 'Vui lòng điền đầy đủ thông tin bắt buộc',
+        description: `Vui lòng điền đầy đủ thông tin: ${missingFields.join(', ')}`,
         confirmLabel: 'OK',
       });
       return;
@@ -92,31 +189,32 @@ const CheckoutScreen: React.FC = () => {
     try {
       load();
       // console.log('Processing checkout...', checkoutData);
-      
+
       const response = await CheckoutService.createOrder(checkoutData);
-      
+
       if (response.code === 200 && response.result?.order_number) {
         console.log('Order created successfully:', response.result);
-        
+
         // Get payment link
         const paymentResponse = await CheckoutService.getLinkPayment({
           locale: currentLanguage,
           orderNumber: response.result.order_number,
+          paymentMethod: 'GALAXYPAY',
         });
-      
-        
+
+
         if (paymentResponse.code === 200 && paymentResponse.result?.redirectUrl) {
           // Navigate to Payment screen with the redirect URL
           navigation.navigate('Payment', { url: paymentResponse.result.redirectUrl });
         } else {
-           showMessage({
+          showMessage({
             title: 'Lỗi',
             description: 'Không thể lấy link thanh toán. Vui lòng thử lại.',
             confirmLabel: 'OK',
           });
         }
       } else {
-         showMessage({
+        showMessage({
           title: 'Lỗi',
           description: response.message || 'Không thể tạo đơn hàng. Vui lòng thử lại.',
           confirmLabel: 'OK',
@@ -124,7 +222,7 @@ const CheckoutScreen: React.FC = () => {
       }
     } catch (error) {
       console.error('Checkout error:', error);
-       showMessage({
+      showMessage({
         title: 'Lỗi',
         description: 'Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.',
         confirmLabel: 'OK',
@@ -144,6 +242,7 @@ const CheckoutScreen: React.FC = () => {
         },
         initialAddress: selectedAddress,
       });
+
     } catch (error) {
       console.log('Address selection cancelled');
     }
@@ -230,7 +329,7 @@ const CheckoutScreen: React.FC = () => {
               }}
             />
 
-            <Input
+            {!hasEsim && <Input
               name="contact_phone"
               control={control}
               label="Số điện thoại"
@@ -245,7 +344,7 @@ const CheckoutScreen: React.FC = () => {
                   message: 'Số điện thoại không hợp lệ'
                 }
               }}
-            />
+            />}
 
             <Input
               name="customer_name"
@@ -257,32 +356,28 @@ const CheckoutScreen: React.FC = () => {
           </View>
 
           {/* Shipping Address */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Địa chỉ nhận SIM</Text>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>
-                Tỉnh/Thành phố, Quận/ Huyện, Phường/Xã<Text style={styles.required}>*</Text>
-              </Text>
-              <TouchableOpacity style={styles.inputWithIcon} onPress={handleAddressSelect}>
-                <Text style={[styles.input, styles.inputNoBorder, selectedAddress?.address ? styles.addressText : styles.addressPlaceholder]}>
-                  {selectedAddress?.address || 'Chọn địa chỉ'}
-                </Text>
-                <Icon name="chevron-down" type="ionicon" size={20} color="#333333" />
-              </TouchableOpacity>
-            </View>
-
-            <Input
-              name="delivery_address"
+          {!isFullEsim && (
+            <ShippingAddress
               control={control}
-              label="Địa chỉ chi tiết"
-              placeholder="Nhập địa chỉ chi tiết"
-              rules={{
-                required: 'Địa chỉ là bắt buộc',
+              selectedAddress={selectedAddress &&
+                selectedAddress.cityId !== undefined &&
+                selectedAddress.districtId !== undefined &&
+                selectedAddress.wardId !== undefined ? {
+                ...selectedAddress,
+                address: selectedAddress.address || '',
+                cityId: selectedAddress.cityId,
+                districtId: selectedAddress.districtId,
+                wardId: selectedAddress.wardId
+              } : undefined}
+              onAddressSelect={handleAddressSelect}
+              isRequired={!isFullEsim}
+              containerStyle={{
+                ...styles.section,
+                marginHorizontal: 16,
+                marginTop: 8
               }}
-              containerStyle={styles.formGroup}
             />
-          </View>
+          )}
 
           {/* Order Summary */}
           <View style={styles.section}>
@@ -296,6 +391,10 @@ const CheckoutScreen: React.FC = () => {
             <View style={styles.orderRow}>
               <Text style={styles.orderLabel}>Thuế & Phí dịch vụ</Text>
               <Text style={styles.orderValue}>Đã bao gồm</Text>
+            </View>
+            <View style={styles.orderRow}>
+              <Text style={styles.orderLabel}>Phí vân chuyển</Text>
+              <Text style={styles.orderValue}>{toCurrency(shipping_amount)}</Text>
             </View>
 
             <View style={[styles.orderRow, styles.totalRow]}>
@@ -325,29 +424,44 @@ const CheckoutScreen: React.FC = () => {
 
         {/* Bottom Section */}
         <View style={styles.bottomSection}>
+          {hasEsim && (
+            <View style={styles.checkboxContainer}>
+              <CustomCheckbox
+                checked={agreeESim}
+                onPress={() => setAgreeESim(!agreeESim)}
+                textSegments={eSimTextSegments}
+                containerStyle={styles.customCheckbox}
+                size={20}
+                checkedColor="#D2008C"
+                uncheckedColor="#A1A1A1"
+                checkboxBorderColor="#A1A1A1"
+              />
+            </View>
+          )}
+
           <View style={styles.checkboxContainer}>
-            <CheckBox
+            <CustomCheckbox
               checked={agreeBank}
               onPress={() => setAgreeBank(!agreeBank)}
-              containerStyle={styles.checkbox}
-              textStyle={styles.checkboxText}
-              title="Tôi đồng ý thuê bao này là thuê bao nhận SMS banking từ Vikki Bank"
-              uncheckedColor="#A1A1A1"
-              checkedColor="#D2008C"
+              textSegments={bankTextSegments}
+              containerStyle={styles.customCheckbox}
               size={20}
+              checkedColor="#D2008C"
+              uncheckedColor="#A1A1A1"
+              checkboxBorderColor="#A1A1A1"
             />
           </View>
 
           <View style={styles.checkboxContainer}>
-            <CheckBox
+            <CustomCheckbox
               checked={agreeTerms}
               onPress={() => setAgreeTerms(!agreeTerms)}
-              containerStyle={styles.checkbox}
-              textStyle={styles.checkboxText}
-              title="Tôi đồng ý với Điều khoản & Điều kiện giao dịch chung của SkyFi và chính sách xử lý, bảo vệ dự liệu cá nhân"
-              uncheckedColor="#A1A1A1"
-              checkedColor="#D2008C"
+              textSegments={termsTextSegments}
+              containerStyle={styles.customCheckbox}
               size={20}
+              checkedColor="#D2008C"
+              uncheckedColor="#A1A1A1"
+              checkboxBorderColor="#A1A1A1"
             />
           </View>
 
@@ -356,7 +470,14 @@ const CheckoutScreen: React.FC = () => {
             onPress={handleSubmit(handleCheckout)}
             type="primary"
             size="medium"
-            disabled={!agreeBank || !agreeTerms || !watch('email') || !watch('contact_phone') || !selectedAddress}
+            disabled={
+              !agreeBank ||
+              !agreeTerms ||
+              (hasEsim && !agreeESim) ||
+              !watch('email') ||
+              (!hasEsim && !watch('contact_phone')) ||
+              (!isFullEsim && !selectedAddress)
+            }
             width="100%"
           />
         </View>
@@ -438,28 +559,6 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 16,
     color: '#333333',
     backgroundColor: '#FFFFFF',
-  },
-  inputWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#F1F1F1',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
-  },
-  inputNoBorder: {
-    borderWidth: 0,
-    flex: 1,
-    paddingHorizontal: 0,
-  },
-  addressText: {
-    color: '#333333',
-    fontSize: 16,
-  },
-  addressPlaceholder: {
-    color: '#A1A1A1',
-    fontSize: 16,
   },
   orderRow: {
     flexDirection: 'row',
@@ -587,7 +686,7 @@ const useStyles = makeStyles((theme) => ({
     borderTopRightRadius: 16,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 8,
+    paddingBottom: 30,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -598,7 +697,7 @@ const useStyles = makeStyles((theme) => ({
     elevation: 5,
   },
   checkboxContainer: {
-    marginBottom: 12,
+    paddingBottom: 8,
   },
   checkbox: {
     backgroundColor: 'transparent',
@@ -612,6 +711,10 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: '400',
     marginLeft: 8,
     flex: 1,
+  },
+  customCheckbox: {
+    // Custom styles for the new checkbox component
+    // The component handles its own internal styling
   },
 }));
 

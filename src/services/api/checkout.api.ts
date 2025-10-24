@@ -5,7 +5,8 @@ const CheckoutService: Checkout.CheckoutAPI = {
     getDistricts: async () => axiosInstance.get(`/bss/app/get-districts`).then(res => res.data),
     getWards: async () => axiosInstance.get('/bss/app/get-wards').then(res => res.data),
     createOrder: async (checkoutInfo) => axiosInstance.post('/bss/app/create-order', checkoutInfo).then(res => res.data),
-    getLinkPayment: async (params) => axiosInstance.post(`/payment/gateways/GALAXYPAY/redirect`, params).then(res => res.data),
+    getLinkPayment: async (params) => axiosInstance.post(`/bss/payment/gateways/GALAXYPAY/redirect`, params).then(res => res.data),
+    getDeliveryFee: async (params) => axiosInstance.post('/bss/app/get-shipping-fee', params).then(res => res.data),
 };
 
 export default CheckoutService;

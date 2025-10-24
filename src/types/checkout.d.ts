@@ -1,11 +1,12 @@
 
 namespace Checkout {
   interface CheckoutAPI {
-    getCities: () => Promise<Response<{cities: City[]}>>;
-    getDistricts: () => Promise<Response<{districts: District[]}>>;
-    getWards: () => Promise<Response<{wards: Ward[]}>>;
-    createOrder: (checkoutInfo: CheckoutInfo) => Promise<Response<{order_number: string}>>;
-    getLinkPayment: (params: ParamsGetLinkPayment) => Promise<Response<{redirectUrl: string}>>;
+    getCities: () => Promise<Response<{ cities: City[] }>>;
+    getDistricts: () => Promise<Response<{ districts: District[] }>>;
+    getWards: () => Promise<Response<{ wards: Ward[] }>>;
+    createOrder: (checkoutInfo: CheckoutInfo) => Promise<Response<{ order_number: string }>>;
+    getLinkPayment: (params: ParamsGetLinkPayment) => Promise<Response<{ redirectUrl: string }>>;
+    getDeliveryFee: (params: ParamDeliveryFee) => Promise<Response<{ shipping_fee: number }>>;
   }
   interface Response<T> {
     requestId: string | null;
@@ -13,6 +14,12 @@ namespace Checkout {
     message: string;
     result: T | null;
     extra: null;
+  }
+  interface ParamDeliveryFee {
+    city_id: number;
+    district_id: number;
+    ward_id: number;
+    delivery_address: string;
   }
   interface City {
     id: number;
@@ -36,6 +43,7 @@ namespace Checkout {
   interface ParamsGetLinkPayment {
     locale: string;
     orderNumber: string;
+    paymentMethod: "GALAXYPAY";
   }
 
   interface CheckoutInfo {
