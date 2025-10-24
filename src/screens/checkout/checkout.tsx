@@ -4,7 +4,6 @@ import { CheckBox, Icon, makeStyles } from '@rneui/themed';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
-  Alert,
   ScrollView,
   Text,
   TextInput,
@@ -16,8 +15,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '../../components/common/CustomButton';
 import Input from '../../components/forms/Input';
 import { SelectedAddress, showAddressSelectModal } from '../../components/modals/AddressSelectModal';
+import { showMessage } from '../../components/modals/ModalComfirm';
+import { useI18n, useLoading } from '../../hooks';
 import { RootStackParamList } from '../../navigation';
+import CheckoutService from '../../services/api/checkout.api';
 import { useSimCheckoutStore } from '../../store';
+import { toCurrency } from '../../utils/format';
 
 type CheckoutNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
 
@@ -25,6 +28,8 @@ const CheckoutScreen: React.FC = () => {
   const navigation = useNavigation<CheckoutNavigationProp>();
   const styles = useStyles();
   const { data: checkoutProducts } = useSimCheckoutStore();
+  const { load, close } = useLoading();
+  const { currentLanguage } = useI18n();
 
   // Form with react-hook-form
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<Checkout.CheckoutInfo>({
@@ -51,20 +56,26 @@ const CheckoutScreen: React.FC = () => {
   const subtotal = checkoutProducts.reduce((sum, product) => sum + (product.total_price || 0), 0);
   const total = subtotal;
 
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString('vi-VN')} VND`;
-  };
 
-  const handleCheckout = handleSubmit((data) => {
+
+  const handleCheckout = async (data: Checkout.CheckoutInfo) => {
     // Validate checkboxes
     if (!agreeBank || !agreeTerms) {
-      Alert.alert('Thông báo', 'Vui lòng đồng ý với các điều khoản');
+       showMessage({
+        title: 'Thông báo',
+        description: 'Vui lòng đồng ý với các điều khoản',
+        confirmLabel: 'OK',
+      });
       return;
     }
 
     // Validate required fields
     if (!data.email || !data.contact_phone || !selectedAddress) {
-      Alert.alert('Thông báo', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+     showMessage({
+        title: 'Thông báo',
+        description: 'Vui lòng điền đầy đủ thông tin bắt buộc',
+        confirmLabel: 'OK',
+      });
       return;
     }
 
@@ -78,8 +89,49 @@ const CheckoutScreen: React.FC = () => {
       items: checkoutProducts,
     };
 
-    console.log('Processing checkout...', checkoutData);
-  });
+    try {
+      load();
+      // console.log('Processing checkout...', checkoutData);
+      
+      const response = await CheckoutService.createOrder(checkoutData);
+      
+      if (response.code === 200 && response.result?.order_number) {
+        console.log('Order created successfully:', response.result);
+        
+        // Get payment link
+        const paymentResponse = await CheckoutService.getLinkPayment({
+          locale: currentLanguage,
+          orderNumber: response.result.order_number,
+        });
+      
+        
+        if (paymentResponse.code === 200 && paymentResponse.result?.redirectUrl) {
+          // Navigate to Payment screen with the redirect URL
+          navigation.navigate('Payment', { url: paymentResponse.result.redirectUrl });
+        } else {
+           showMessage({
+            title: 'Lỗi',
+            description: 'Không thể lấy link thanh toán. Vui lòng thử lại.',
+            confirmLabel: 'OK',
+          });
+        }
+      } else {
+         showMessage({
+          title: 'Lỗi',
+          description: response.message || 'Không thể tạo đơn hàng. Vui lòng thử lại.',
+          confirmLabel: 'OK',
+        });
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+       showMessage({
+        title: 'Lỗi',
+        description: 'Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.',
+        confirmLabel: 'OK',
+      });
+    }
+    finally { close(); }
+  };
 
   const handleAddressSelect = async () => {
     try {
@@ -119,11 +171,11 @@ const CheckoutScreen: React.FC = () => {
       <View style={styles.productPriceContainer}>
         {product.base_price && product.base_price !== product.total_price ? (
           <View style={styles.salePriceContainer}>
-            <Text style={styles.productPrice}>{formatCurrency(product.total_price || 0)}</Text>
-            <Text style={styles.originalPrice}>{formatCurrency(product.base_price)}</Text>
+            <Text style={styles.productPrice}>{toCurrency(product.total_price || 0)}</Text>
+            <Text style={styles.originalPrice}>{toCurrency(product.base_price)}</Text>
           </View>
         ) : (
-          <Text style={styles.productPrice}>{formatCurrency(product.total_price || 0)}</Text>
+          <Text style={styles.productPrice}>{toCurrency(product.total_price || 0)}</Text>
         )}
       </View>
     </View>
@@ -238,7 +290,7 @@ const CheckoutScreen: React.FC = () => {
 
             <View style={styles.orderRow}>
               <Text style={styles.orderLabel}>{checkoutProducts.length} sản phẩm</Text>
-              <Text style={styles.orderValue}>{formatCurrency(subtotal)}</Text>
+              <Text style={styles.orderValue}>{toCurrency(subtotal)}</Text>
             </View>
 
             <View style={styles.orderRow}>
@@ -248,7 +300,7 @@ const CheckoutScreen: React.FC = () => {
 
             <View style={[styles.orderRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Tổng cộng</Text>
-              <Text style={styles.totalValue}>{formatCurrency(total)}</Text>
+              <Text style={styles.totalValue}>{toCurrency(total)}</Text>
             </View>
 
             {/* Promo Code */}
@@ -301,7 +353,7 @@ const CheckoutScreen: React.FC = () => {
 
           <CustomButton
             title="Hoàn tất thanh toán"
-            onPress={handleCheckout}
+            onPress={handleSubmit(handleCheckout)}
             type="primary"
             size="medium"
             disabled={!agreeBank || !agreeTerms || !watch('email') || !watch('contact_phone') || !selectedAddress}

@@ -4,7 +4,8 @@ namespace Checkout {
     getCities: () => Promise<Response<{cities: City[]}>>;
     getDistricts: () => Promise<Response<{districts: District[]}>>;
     getWards: () => Promise<Response<{wards: Ward[]}>>;
-    createOrder: (checkoutInfo: CheckoutInfo) => Promise<Response<any>>;
+    createOrder: (checkoutInfo: CheckoutInfo) => Promise<Response<{order_number: string}>>;
+    getLinkPayment: (params: ParamsGetLinkPayment) => Promise<Response<{redirectUrl: string}>>;
   }
   interface Response<T> {
     requestId: string | null;
@@ -30,6 +31,11 @@ namespace Checkout {
     id: number;
     name: string;
     district_id: number;
+  }
+
+  interface ParamsGetLinkPayment {
+    locale: string;
+    orderNumber: string;
   }
 
   interface CheckoutInfo {

@@ -8,6 +8,7 @@ import ShareInfoScreen from '../screens/ActiveSimFlow/ShareInfoScreen';
 import SignTheContractScreen from '../screens/ActiveSimFlow/SignTheContractScreen';
 import BottomTabNavigator from '../screens/BottomTabBar';
 import CheckoutScreen from '../screens/checkout/checkout';
+import PaymentScreen from '../screens/checkout/Payment';
 import ResultVideoCall from '../screens/Meeting/ResultVideoCall';
 import VideoCallScreen from '../screens/Meeting/VideoCallScreen';
 import SimDataScreen from '../screens/simData/SimData';
@@ -91,6 +92,13 @@ export const RootNavigator = () => (
     <RootStack.Screen
         component={CheckoutScreen}
         name="Checkout"
+        options={{
+            headerShown: false,
+        }}
+    />
+    <RootStack.Screen
+        component={PaymentScreen}
+        name="Payment"
         options={{
             headerShown: false,
         }}

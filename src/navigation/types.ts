@@ -16,6 +16,7 @@ export type RootStackParamList = {
     ResultVideoCall: { status: 'success' | 'error' };
     SimData: undefined;
     Checkout: undefined;
+    Payment: { url: string };
 
 };
 
