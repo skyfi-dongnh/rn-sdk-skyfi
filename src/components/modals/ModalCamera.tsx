@@ -65,7 +65,7 @@ export const ModalCamera: React.FC<ModalCameraProps> = ({
 	const isCircularFrame = cameraPosition === 'front';
 	const frameWidth = isCircularFrame ? FRAME_WIDTH_FRONT : FRAME_WIDTH_BACK;
 	const frameHeight = isCircularFrame ? FRAME_HEIGHT_FRONT : FRAME_HEIGHT_BACK;
-	const frameBorderRadius = isCircularFrame ? FRAME_WIDTH_FRONT / 2 : FRAME_BORDER_RADIUS_BACK; // Use width/2 for ellipse to create smooth oval
+	const frameBorderRadius = FRAME_BORDER_RADIUS_BACK; // Use width/2 for ellipse to create smooth oval
 
 	useEffect(() => {
 		if (visible) {
@@ -278,7 +278,7 @@ export const ModalCamera: React.FC<ModalCameraProps> = ({
 								<Image
 									source={{ uri: capturedPhoto.base64 }}
 									style={StyleSheet.absoluteFill}
-									resizeMode="cover"
+									resizeMode="contain"
 								/>
 
 								{/* Dark Overlay with cutout for ID card frame */}
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: '#000000',
-		borderRadius:8
+		borderRadius: 8
 	},
 	overlay: {
 		...StyleSheet.absoluteFillObject,
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
 	},
 	overlayTop: {
 		flex: 1,
-
+		backgroundColor: 'rgba(0, 0, 0, 0.6)',
 	},
 	overlayMiddle: {
 		flexDirection: 'row',
@@ -389,6 +389,7 @@ const styles = StyleSheet.create({
 	},
 	overlaySide: {
 		flex: 1,
+		backgroundColor: 'rgba(0, 0, 0, 0.6)',
 	},
 	frameGuide: {
 		// width, height, and borderRadius are set dynamically via inline style
@@ -432,7 +433,7 @@ const styles = StyleSheet.create({
 	},
 	overlayBottom: {
 		flex: 1,
-
+		backgroundColor: 'rgba(0, 0, 0, 0.6)',
 	},
 	header: {
 		position: 'absolute',
@@ -523,7 +524,7 @@ const styles = StyleSheet.create({
 	// Preview screen styles
 	helpTextContainer: {
 		position: 'absolute',
-		bottom:  150,
+		bottom: 150,
 		left: 0,
 		right: 0,
 		paddingHorizontal: 65,

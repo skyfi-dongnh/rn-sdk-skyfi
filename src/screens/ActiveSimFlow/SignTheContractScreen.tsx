@@ -6,6 +6,7 @@ import * as React from 'react';
 import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
 import SignatureCanvas from 'react-native-signature-canvas';
 
+import { showMessage } from '../../components/modals/ModalComfirm';
 import { showPdfViewerModal } from '../../components/modals/ModalPdfViewer';
 import { useLoading } from '../../hooks';
 import type { RootStackParamList } from '../../navigation/types';
@@ -22,7 +23,7 @@ const SignTheContractScreen = () => {
     const signatureRef = React.useRef<any>(null);
     const [isSigning, setIsSigning] = React.useState(false);
     const { close, load } = useLoading();
-    const [contractUrl, setContractUrl] = React.useState<string>('');
+
 
     const handleSignature = (signature: string) => {
         setData({ ...data, img4: signature.replace('data:image/png;base64,', '') });
@@ -40,23 +41,28 @@ const SignTheContractScreen = () => {
     };
 
     const getContract = async () => {
-        load();
+
         try {
             const { img1, img2, img3, ...newData } = data
             const response = await ActivateApi.getContract(newData);
             if (response.code === 200) {
-                setContractUrl(response.result);
+                return response.result;
             }
+            return '';
         } catch (error) {
             console.error('Failed to get contract:', error);
-        } finally {
-            close();
+            return '';
         }
     };
 
     const handleContractPress = async () => {
 
         try {
+            load();
+            const contractUrl = await getContract();
+            if (!contractUrl) {
+                throw new Error('Contract URL is empty');
+            }
             await showPdfViewerModal({
                 pdfSource: contractUrl, // Replace with your contract PDF URL
                 title: 'Hợp đồng dịch vụ',
@@ -70,27 +76,26 @@ const SignTheContractScreen = () => {
                 },
             });
         } catch (error) {
-            console.log('User closed contract viewer', error);
+            showMessage({
+                title: 'Thông báo',
+                description: error instanceof Error ? error.message : 'Đã có lỗi xảy ra khi tải hợp đồng.',
+                closeLabel: 'Đóng',
+
+            })
+        } finally {
+            close();
         }
     };
-
-    const handleContinue = () => {
-        signatureRef.current?.readSignature();
-    };
-
     const isButtonDisabled = !isAgreed || !isSigning;
 
-    React.useEffect(() => {
-        if (data.img4) {
-            getContract();
-        }
-    }, [data.img4]);
+
 
 
 
     const saveLogVideoCall = async () => {
         try {
             load();
+            await getContract();
             const response = await ActivateApi.saveLogVideoCall(data);
             if (response.code === 200) {
                 navigation.navigate('Meeting', {
@@ -100,7 +105,12 @@ const SignTheContractScreen = () => {
                 })
             }
         } catch (error) {
-            console.error('Failed to save video call log:', error);
+            showMessage({
+                title: 'Thông báo',
+                description: error instanceof Error ? error.message : 'Đã có lỗi xảy ra khi lưu thông tin.',
+                closeLabel: 'Đóng',
+
+            })
         } finally {
             close();
         }
@@ -124,10 +134,8 @@ const SignTheContractScreen = () => {
                 </View>
 
                 {/* Main Content */}
-                <ScrollView
+                <View
                     style={styles.content}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollContent}
                 >
                     <View style={styles.form}>
                         {/* Title */}
@@ -150,7 +158,7 @@ const SignTheContractScreen = () => {
                             </TouchableOpacity>
 
                             {/* Terms Text */}
-                            <View>
+                            <ScrollView style={{ maxHeight: 110 }}>
                                 <Text style={styles.termsText}>
                                     ✣ Việc đăng ký thông tin thuê bao trên hệ thống sẽ chỉ được thực hiện sau khi cung cấp
                                     đầy đủ các giấy tờ, thông tin theo quy định của pháp luật.{'\n'}
@@ -169,7 +177,7 @@ const SignTheContractScreen = () => {
                                         ✣ Chính sách xử lý và bảo vệ dữ liệu cá nhân
                                     </Text>
                                 </Text>
-                            </View>
+                            </ScrollView>
                         </View>
 
                         {/* Contract Note */}
@@ -229,7 +237,7 @@ const SignTheContractScreen = () => {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
 
                 {/* Bottom Button */}
                 <View style={styles.bottomContainer}>
@@ -304,9 +312,6 @@ const useStyles = makeStyles((theme) => ({
     },
     content: {
         flex: 1,
-    },
-    scrollContent: {
-
     },
     form: {
         padding: 16,
