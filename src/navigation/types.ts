@@ -17,6 +17,8 @@ export type RootStackParamList = {
     SimData: undefined;
     Checkout: undefined;
     Payment: { url: string };
+    InAppBrowserTest: undefined;
+    CustomBrowser: { url: string };
 
 };
 

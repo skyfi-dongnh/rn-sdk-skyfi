@@ -203,8 +203,8 @@ const HomeScreen: React.FC = ({}) => {
               onPress={() => navigation.navigate('ShareInfo')}
             />
             <Button
-              title="Modal Examples"
-              onPress={() => navigation.navigate('ModalExamples')}
+              title="InAppBrowser Test"
+              onPress={() => navigation.navigate('InAppBrowserTest')}
             />
             <Button
               title="Modal Examples PDF"

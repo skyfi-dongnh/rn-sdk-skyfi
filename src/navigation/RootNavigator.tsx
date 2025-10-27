@@ -9,6 +9,8 @@ import SignTheContractScreen from '../screens/ActiveSimFlow/SignTheContractScree
 import BottomTabNavigator from '../screens/BottomTabBar';
 import CheckoutScreen from '../screens/checkout/checkout';
 import PaymentScreen from '../screens/checkout/Payment';
+import CustomBrowserScreen from '../screens/InAppBrowserTest/CustomBrowserScreen';
+import InAppBrowserTestScreen from '../screens/InAppBrowserTest/InAppBrowserTestScreen';
 import ResultVideoCall from '../screens/Meeting/ResultVideoCall';
 import VideoCallScreen from '../screens/Meeting/VideoCallScreen';
 import SimDataScreen from '../screens/simData/SimData';
@@ -101,6 +103,21 @@ export const RootNavigator = () => (
         name="Payment"
         options={{
             headerShown: false,
+        }}
+    />
+    <RootStack.Screen
+        component={InAppBrowserTestScreen}
+        name="InAppBrowserTest"
+        options={{
+            headerShown: false,
+        }}
+    />
+    <RootStack.Screen
+        component={CustomBrowserScreen}
+        name="CustomBrowser"
+        options={{
+            headerShown: false,
+            presentation: 'modal',
         }}
     />
 
