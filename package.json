@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "update-deps": "node node_modules/@jitsi/react-native-sdk/update_dependencies.js"
+    "update-deps": "node node_modules/@jitsi/react-native-sdk/update_dependencies.js",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.4.13",
