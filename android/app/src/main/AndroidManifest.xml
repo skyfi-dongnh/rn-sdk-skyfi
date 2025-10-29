@@ -33,5 +33,12 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <!-- react-native-in-browser WebViewActivity -->
+    <activity
+        android:name="com.rninbrowser.WebViewActivity"
+        android:exported="false"
+        android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+        android:windowSoftInputMode="adjustResize" />
   </application>
 </manifest>

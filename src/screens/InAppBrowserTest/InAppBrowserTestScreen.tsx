@@ -2,7 +2,6 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
-    NativeModules,
     ScrollView,
     StyleSheet,
     Text,
@@ -10,8 +9,7 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const { RNInBrowserApp } = NativeModules;
+import RNInBrowserApp from 'react-native-in-browser';
 
 const InAppBrowserTestScreen = () => {
     const navigation = useNavigation<any>();
@@ -25,17 +23,10 @@ const InAppBrowserTestScreen = () => {
 
     const checkAvailability = async () => {
         try {
-            console.log('RNInBrowserApp object:', RNInBrowserApp);
-            console.log('RNInBrowserApp methods:', Object.keys(RNInBrowserApp || {}));
+            console.log('RNInBrowserApp module:', RNInBrowserApp);
 
-            if (!RNInBrowserApp) {
-                setStatus('Error: RNInBrowserApp module is null');
-                setIsAvailable(false);
-                return;
-            }
-
-            if (typeof RNInBrowserApp.open !== 'function') {
-                setStatus('Error: open method is not available');
+            if (!RNInBrowserApp || !RNInBrowserApp.open) {
+                setStatus('Error: RNInBrowserApp module is not available');
                 setIsAvailable(false);
                 return;
             }
@@ -54,19 +45,15 @@ const InAppBrowserTestScreen = () => {
             setStatus('Opening browser...');
             setLastUrl(url);
 
-            if (!RNInBrowserApp || typeof RNInBrowserApp.open !== 'function') {
-                throw new Error('RNInBrowserApp module is not properly loaded');
-            }
-
             const options = {
                 showCloseButton: true,
                 ...customOptions,
             };
 
             const result = await RNInBrowserApp.open(url, options);
-            console.log(result);
+            console.log('Browser result:', result);
 
-            setStatus('Browser opened successfully');
+            setStatus(`Browser closed - ${result.type}`);
         } catch (error: any) {
             setStatus(`Error: ${error.message}`);
             Alert.alert('Error', error.message);

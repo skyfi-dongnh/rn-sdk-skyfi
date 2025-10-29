@@ -99,6 +99,14 @@ const HomeScreen: React.FC = ({}) => {
     // navigation.navigate('Meeting', { room: '0879999328' });
   };
 
+  const onMoveMeetingBrowser = () => {
+    navigation.navigate('MeetingBrowser', {
+      "phoneNumber": "84707000354",
+      "currentSerial": "25101386848211",
+      "detail_id": "250"
+    })
+  };
+
   const handleCartPress = () => {
     Alert.alert('Cart', 'Shopping cart pressed!');
   };
@@ -196,6 +204,11 @@ const HomeScreen: React.FC = ({}) => {
             <Button
               title={t('home.startCall')}
               onPress={onMoveVideoCall}
+            />
+            <Button
+              title="Meeting Browser (RNInBrowserApp)"
+              onPress={onMoveMeetingBrowser}
+              buttonStyle={{ backgroundColor: '#9C27B0' }}
             />
             {/* button open Active Sim Flow */}
             <Button

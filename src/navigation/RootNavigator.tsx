@@ -11,6 +11,7 @@ import CheckoutScreen from '../screens/checkout/checkout';
 import PaymentScreen from '../screens/checkout/Payment';
 import CustomBrowserScreen from '../screens/InAppBrowserTest/CustomBrowserScreen';
 import InAppBrowserTestScreen from '../screens/InAppBrowserTest/InAppBrowserTestScreen';
+import MeetingBrowserScreen from '../screens/Meeting/MeetingBrowserScreen';
 import ResultVideoCall from '../screens/Meeting/ResultVideoCall';
 import VideoCallScreen from '../screens/Meeting/VideoCallScreen';
 import SimDataScreen from '../screens/simData/SimData';
@@ -58,6 +59,13 @@ export const RootNavigator = () => (
       <RootStack.Screen
         component={VideoCallScreen}
         name="Meeting"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <RootStack.Screen
+        component={MeetingBrowserScreen}
+        name="MeetingBrowser"
         options={{
           headerShown: false,
         }}
