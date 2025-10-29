@@ -6880,7 +6880,7 @@ react-native-get-random-values@1.11.0:
 
 "react-native-in-browser@https://github.com/Leung190299/react-native-in-browser.git#main":
   version "1.0.0"
-  resolved "https://github.com/Leung190299/react-native-in-browser.git#b1b4075b7dee3747881d4ae90b47a26ec752b0c4"
+  resolved "https://github.com/Leung190299/react-native-in-browser.git#c2d8ffc9797360920f8f6d15536cfe5b5f8ac807"
 
 react-native-inappbrowser-reborn@^3.7.0:
   version "3.7.0"

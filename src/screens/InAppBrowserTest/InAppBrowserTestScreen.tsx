@@ -8,8 +8,8 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import RNInBrowserApp, { openInAppBrowser } from 'react-native-in-browser';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import RNInBrowserApp from 'react-native-in-browser';
 
 const InAppBrowserTestScreen = () => {
     const navigation = useNavigation<any>();
@@ -50,7 +50,7 @@ const InAppBrowserTestScreen = () => {
                 ...customOptions,
             };
 
-            const result = await RNInBrowserApp.open(url, options);
+            const result = await openInAppBrowser(url, options);
             console.log('Browser result:', result);
 
             setStatus(`Browser closed - ${result.type}`);

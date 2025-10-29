@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Platform, View } from 'react-native';
-import RNInBrowserApp from 'react-native-in-browser';
+import { openInAppBrowser } from 'react-native-in-browser';
 import { io } from "socket.io-client";
 
 import { showMessage } from '../../components/modals/ModalComfirm';
@@ -81,14 +81,19 @@ const MeetingBrowser = ({ route }: MeetingBrowserProps) => {
   // Open the Jitsi meeting in the in-app browser
   const openJitsiMeeting = async (roomId: string, meetingToken: string) => {
     try {
- ;
+      ;
       // /jitsi-meeting?url=meet.itel.vn&token=YOUR_JWT_TOKEN&roomName=YOUR_ROOM_NAME
       const meetingUrl = `https://skyfi.network/jitsi-meeting?url=${jitsiURL}&token=${meetingToken}&roomName=${roomId}`;
 
       console.log('Opening Jitsi meeting in browser:', meetingUrl);
       // Open in RNInBrowserApp
-      const result = await RNInBrowserApp.open(meetingUrl, {
+      const result = await openInAppBrowser(meetingUrl, {
         showCloseButton: true,
+        onUrlChange: (url) => {
+          console.log('🔄 URL changed to:', url);
+
+        }
+
       });
 
       console.log('Browser closed with result:', result);

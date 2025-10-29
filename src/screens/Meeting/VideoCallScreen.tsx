@@ -312,4 +312,17 @@ const Meeting = ({ route }: MeetingProps) => {
   );
 };
 
+
+// {roomStatus == 'connected' && <WebView
+//       // ref={webViewRef}
+//       url={`https://skyfi.network/jitsi-meeting?url=${jitsiURL}&token=${token}&roomName=${room}`}
+//       onLoadEnd={(e) => console.log('Loaded:', e.nativeEvent.url)}
+//       style={{ flex: 1 ,position: 'absolute', top: 0, left: 0, width: width, height: height}}
+//     >
+//       <Button
+//         title="Go Back"
+//         onPress={() => _onEndButtonPress("1")}
+//       />
+//     </WebView>
+//     }
 export default Meeting;
