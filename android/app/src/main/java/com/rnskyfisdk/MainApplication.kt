@@ -13,6 +13,7 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
 import com.oney.WebRTCModule.WebRTCModuleOptions
+import android.util.Log
 
 class MainApplication : Application(), ReactApplication {
 
@@ -37,6 +38,20 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+
+    // Set up global exception handler for VisionCamera race condition
+    val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+    Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+      if (throwable is IllegalStateException &&
+          throwable.message?.contains("Tried to access a JS module before the React instance was fully set up") == true) {
+        Log.e("MainApplication", "Caught VisionCamera race condition, ignoring...", throwable)
+        // Don't crash, just log and continue
+      } else {
+        // Let default handler handle other exceptions
+        defaultHandler?.uncaughtException(thread, throwable)
+      }
+    }
+
     val options = WebRTCModuleOptions.getInstance()
     options.enableMediaProjectionService = true
     SoLoader.init(this, OpenSourceMergedSoMapping)

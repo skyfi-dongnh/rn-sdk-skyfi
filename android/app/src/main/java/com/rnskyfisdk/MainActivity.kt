@@ -1,5 +1,6 @@
 package com.rnskyfisdk
 
+import android.os.Bundle
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -19,4 +20,13 @@ class MainActivity : ReactActivity() {
    */
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    try {
+      super.onCreate(savedInstanceState)
+    } catch (e: Exception) {
+      android.util.Log.e("MainActivity", "Error in onCreate", e)
+      // Continue execution despite the error
+    }
+  }
 }
